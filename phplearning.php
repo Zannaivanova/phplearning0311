@@ -3,14 +3,18 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Вывод значения переменной (элемента массива)</title>
+	<title>Пример использования управляющих структур и функций</title>
 </head>
 <body>
 	 
 
+
 <?php
-echo $_SERVER['HTTP_USER_AGENT'];
+if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') == FALSE) {
+    echo 'Вы не используете Internet Explorer.<br />';
+}
 ?>
+
 
 
 <!-- 	https://www.php.net/manual/ru/tutorial.useful.php -->

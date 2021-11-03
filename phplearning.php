@@ -7,6 +7,6 @@
 </head>
 <body>
 	 <?php echo '<p>Привет, мир!</p>'; ?>
-	 https://www.php.net/manual/ru/tutorial.firstpage.php
-</body>
+	 <!-- https://www.php.net/manual/ru/tutorial.firstpage.php
+ --></body>
 </html>

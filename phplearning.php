@@ -3,35 +3,127 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>4 скалярныe типа: "float", "double" или "real"</title>
+	<title>4 скалярныe типа: string</title>
 </head>
 <body>
 
+
+//Одинарные кавычки
+<br><?php
+echo 'это простая строка';
+
+
+echo 'Также вы можете вставлять в строки
+символ новой строки вот так,
+это нормально';
+
+// Выводит: Однажды Арнольд сказал: "I'll be back"
+echo 'Однажды Арнольд сказал: "I\'ll be back"';
+
+// Выводит: Вы удалили C:\*.*?
+echo 'Вы удалили C:\\*.*?';
+
+// Выводит: Вы удалили C:\*.*?
+echo 'Вы удалили C:\*.*?';
+
+// Выводит: Это не будет развёрнуто: \n новая строка
+echo 'Это не будет развёрнуто: \n новая строка';
+
+// Выводит: Переменные $expand также $either не разворачиваются
+echo 'Переменные $expand также $either не разворачиваются';
+?>
+
+<br>
+<?php 
+$juice = "apple";
+
+echo "He drank some $juice juice.".PHP_EOL;
+
+//Некорректно. 's' - верный символ для имени переменной, но переменная имеет имя $juice.
+echo "He drank some juice made of $juices.";
+
+// Корректно. Строго указан конец имени переменной с помощью скобок:
+echo "He drank some juice made of ${juice}s.";
+
+?>
+
+<br>
+// двойными кавычками
+
+<br>
+//heredoc-синтаксисом
+
 <?php
-$x = 8 - 6.4;  // which is equal to 1.6
-$y = 1.6;
-var_dump($x == $y); // is not true
-
-// PHP thinks that 1.6 (coming from a difference) is not equal to 1.6. To make it work, use round()
-
-// var_dump(round($x, 2) == round($y, 2)); // this is true
-
-// This happens probably because $x is not really 1.6, but 1.599999.. and var_dump shows it to you as being 1.6.
+$values = [<<<END
+a
+  b
+    c
+END, 'd e f'];
+var_dump($values);
 ?>
 
 
-<!-- // Сравнение чисел с плавающей точкой  -->
 <?php
-$a = 1.23456789;
-$b = 1.23456780;
-$epsilon = 0.00001;
+$str = <<<EOD
+Пример строки,
+охватывающей несколько строк,
+с использованием heredoc-синтаксиса.
+EOD;
 
-if (abs($a - $b) < $epsilon) {
-    echo "true";
+/* Более сложный пример с переменными. */
+class foo
+{
+    var $foo;
+    var $bar;
+
+    function __construct()
+    {
+        $this->foo = 'Foo';
+        $this->bar = array('Bar1', 'Bar2', 'Bar3');
+    }
 }
+
+$foo = new foo();
+$name = 'Имярек';
+
+echo <<<EOT
+Меня зовут "$name". Я печатаю $foo->foo.
+Теперь я вывожу {$foo->bar[1]}.
+Это должно вывести заглавную букву 'A': \x41
+EOT;
 ?>
 
 
-<!-- 	https://www.php.net/manual/ru/language.types.float.php-->
+
+<br>
+//nowdoc-синтаксисом 
+
+
+<?php
+/* Более сложный пример с переменными. */
+class foo
+{
+    public $foo;
+    public $bar;
+
+    function __construct()
+    {
+        $this->foo = 'Foo';
+        $this->bar = array('Bar1', 'Bar2', 'Bar3');
+    }
+}
+
+$foo = new foo();
+$name = 'Имярек';
+
+echo <<<'EOT'
+Меня зовут "$name". Я печатаю $foo->foo.
+Теперь я печатаю {$foo->bar[1]}.
+Это не должно вывести заглавную 'A': \x41
+EOT;
+?>
+
+
+<!-- 	https://www.php.net/manual/ru/language.types.string.php-->
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Типы PHP</title>
+	<title>4 скалярныe типа: Булев</title>
 </head>
 <body>
 	 
@@ -11,31 +11,40 @@
 
 
 <?php
-$a_bool = TRUE;
-$a_str = "foo";
-$a_str2 = 'foo';
-$an_int = 12;
-
-echo gettype($a_bool); 
-echo gettype($a_str);
-
-
-//Если целое число, увеличить на четыре
-if (is_int($an_int)){
-	$an_int +=4;
+// == это оператор, который проверяет
+// эквивалентность и возвращает boolean
+if ($action == "show_version") {
+    echo "Версия 1.23";
 }
 
-//Если $a_bool - это строка, вывести её
-if (is_string($a_bool)) {
-	echo "Строка: $a_bool";
-} 
+// это необязательно...
+if ($show_separators == TRUE) {
+    echo "<hr>\n";
+}
 
-echo PHP_INT_MAX;
+// ... потому что следующее имеет тот же самый смысл:
+if ($show_separators) {
+    echo "<hr>\n";
+}
+
+// if ($action == "show_version"){
+// 	echo "Версия 1.23";
+// }
+
+
+// if ($show_separators == TRUE){
+// 	echo "<hr>\n";
+// }
+
+// if ($show_separator){
+// 	echo "<hr>\n";
+// }
+
 
 ?>
 
 
 
-<!-- 	https://www.php.net/manual/ru/language.types.intro.php-->
+<!-- 	https://www.php.net/manual/ru/language.types.boolean.php-->
 </body>
 </html>

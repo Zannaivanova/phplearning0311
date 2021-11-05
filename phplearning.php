@@ -3,42 +3,35 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>4 скалярныe типа: int</title>
+	<title>4 скалярныe типа: "float", "double" или "real"</title>
 </head>
 <body>
-	 
 
 <?php
-$a = 1234; // десятичное число
-$a = 0123; // восьмеричное число (эквивалентно 83 в десятичной системе)
-$a = 0x1A; // шестнадцатеричное число (эквивалентно 26 в десятичной системе)
-$a = 0b11111111; // двоичное число (эквивалентно 255 в десятичной системе)
-$a = 1_234_567; // десятичное число (с PHP 7.4.0)
+$x = 8 - 6.4;  // which is equal to 1.6
+$y = 1.6;
+var_dump($x == $y); // is not true
+
+// PHP thinks that 1.6 (coming from a difference) is not equal to 1.6. To make it work, use round()
+
+// var_dump(round($x, 2) == round($y, 2)); // this is true
+
+// This happens probably because $x is not really 1.6, but 1.599999.. and var_dump shows it to you as being 1.6.
 ?>
 
 
-<!-- Пример #3 Переполнение целых на 64-битных системах -->
-
+<!-- // Сравнение чисел с плавающей точкой  -->
 <?php
-$large_number = 9223372036854775807;
-var_dump($large_number);                     // int(9223372036854775807)
+$a = 1.23456789;
+$b = 1.23456780;
+$epsilon = 0.00001;
 
-$large_number = 9223372036854775808;
-var_dump($large_number);                     // float(9.2233720368548E+18)
-
-$million = 1000000;
-$large_number =  50000000000000 * $million;
-var_dump($large_number);                     // float(5.0E+19)
+if (abs($a - $b) < $epsilon) {
+    echo "true";
+}
 ?>
 
 
-<?php
-var_dump(25/7);         // float(3.5714285714286)
-var_dump((int) (25/7)); // int(3)
-var_dump(round(25/7));  // float(4)
-?>
-
-
-<!-- 	https://www.php.net/manual/ru/language.types.integer.php-->
+<!-- 	https://www.php.net/manual/ru/language.types.float.php-->
 </body>
 </html>

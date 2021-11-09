@@ -3,32 +3,25 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>4 смешанные типа: Объекты</title>
+	<title>Перечисления: Enums</title>
 </head>
 <body>
 <?php 
-class foo {
-	function do_foo(){
-		echo "Код foo.";
-	}
-} 
+enum Suit {
+	case Hearts;
+	case Diamonds;
+	case Clubs;
+	case Spades;
+}
 
-$bar = new foo;
-$bar->do_foo();
-?>
+function do_stuff(Suit $s) {
 
+}
 
-<?php 
-$obj = (object) array ('1'=>'foo');
-var_dump(isset($obj->{'1'}));
-var_dump(key($obj));
+do_stuff(Suit::Spades);
  ?>
 
- <?php 
-$obj = (object)'привет';
-echo $obj->scalar;
-  ?>
 
-<!-- https://www.php.net/manual/ru/language.types.object.php -->
+<!-- https://www.php.net/manual/ru/language.types.enumerations.php -->
 </body>
 </html>

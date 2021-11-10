@@ -3,23 +3,47 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>2 специальных типа: resource </title>
+	<title>2 специальных типа: NULL </title>
 </head>
 <body>
 
-<?php
-// выводит: stream
-$fp = fopen("foo", "w");
-echo get_resource_type($fp) . "\n";
+<!-- ей была присвоена константа null -->
+<?php 
+$var = NULL;
+ ?>
 
-// prints: curl
-$c = curl_init ();
-echo get_resource_type($c) . "\n"; // это работает до версии PHP 8.0.0 так как с версии 8.0 curl_init возвращает объект CurlHandle, а не ресурс
+
+<!-- ей ещё не было присвоено никакого значения. -->
+<!-- Пример #1 Пример использования is_null() -->
+<?php 
+error_reporting(E_ALL);
+
+$foo = NULL;
+var_dump(is_null($inexistent), is_null($foo));
+ ?>
+
+
+<!-- она была удалена с помощью unset(). -->
+<?php
+function destroy_foo()
+{
+    global $foo;
+    unset($foo);
+}
+
+$foo = 'bar';
+destroy_foo();
+echo $foo;
 ?>
 
 
-<!-- https://www.php.net/manual/ru/language.types.resource.php
- -->
+
+
+
+
+
+
+<!-- https://www.php.net/manual/ru/language.types.null.php -->
  	
  </body>
 </html>

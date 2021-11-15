@@ -3,61 +3,173 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Veriables(переменные)</title>
+	<title>Scope(Область видимости переменной)</title>
 </head>
 <body>
 <?php  
-$var = 'Боб';
-$Var = 'Джо';
-
-echo "$var, $Var";
+$a = 1;
+include 'b.inc';
 ?>
 
-<?php  
-$foo = 'Боб';
-$bar = &$foo;
-$bar = "Меня зовут $bar";
 
-echo $bar;
-echo $foo;
+<?php
+$a = 1; /* глобальная область видимости */
+
+function test()
+{
+    echo $a = 2; /* ссылка на переменную в локальной области видимости */
+}
+
+test();
 ?>
 
-<!-- Пример #1 Значения по умолчанию в неинициализированных переменных -->
+<!-- Пример #1 Использование global -->
 <?php 
-// Неустановленная И не имеющая ссылок (то есть без контекста использования) переменная; выведет NULL
-var_dump($unset_var);
+$a = 1;
+$b = 2;
 
+function Sum(){
+	global $a, $b;
+	$b = $a+$b;
+}
 
+Sum();
+echo $b;
+?>
 
-// Булевое применение; выведет 'false' (Подробнее по этому синтаксису смотрите раздел о тернарном операторе)
-echo($unset_bool ? "true\n": "false\n");
+<!-- Пример #2 Использование $GLOBALS вместо global -->
+<?php  
+$a = 1;
+$b = 2;
 
-// Строковое использование; выведет 'string(3) "abc"'
-$unset_str .='abc';
-var_dump($unset_str);
+function Sum(){
+	$GLOBALS['b'] = $GLOBALS['a'] + $GLOBALS['b'];
+}
 
+Sum();
+echo $b;
+?>
 
-// Целочисленное использование; выведет 'int(25)'
-$unset_int +=25;
-var_dump($unset_int);															
-
-// Использование в качестве числа с плавающей точкой (float/double); выведет 'float(1.25)'
-$unset_float +=1.25;
-var_dump($unset_float);								
-
-// Использование в качестве массива; выведет array(1) {  [3]=>  string(3) "def" }
-$unset_arr[3]='def';
-var_dump($unset_arr);
-
-// Использование в качестве объекта; создаёт новый объект stdClass (смотрите http://www.php.net/manual/ru/reserved.classes.php)
-// Выведет: object(stdClass)#1 (1) {  ["foo"]=>  string(3) "bar" }
-$unset_obj->foo = 'bar';
-var_dump($unset_obj);
-
-
+<!-- Пример #3 Суперглобальные переменные и область видимости -->
+<?php  
+function test_superglobal(){
+echo $_POST['name'];
+}
 ?>
 
 
-<!-- https://www.php.net/manual/ru/language.variables.basics.php -->
+<!-- Пример #4 Демонстрация необходимости статических переменных -->
+<?php  
+function tets(){
+$a = 0;
+echo $a;
+$a++;
+}
+?>
+
+<!-- Пример #5 Пример использования статических переменных -->
+<?php 
+function test(){
+	static $a = 0;
+	echo $a;
+	$a++;
+}
+?>
+
+<!-- Пример #6 Статические переменные и рекурсивные функции -->
+<?php
+function test(){
+	static $count = 0;
+
+	$count++;
+	echo $count;
+	if ($count<10){
+		test();
+	}
+	$count--;
+  ?>
+}
+
+<!-- Пример #7 Объявление статических переменных -->
+
+<?php
+function foo() {
+    static $int = 0;          // верно
+    static $int = 1+2;        // верно
+    static $int = sqrt(121);  // неверно (поскольку это функция)
+
+    $int++;
+    echo $int;
+}
+?>
+
+
+<!-- Ссылки с глобальными (global) и статическими (static) переменными  -->
+
+<?php
+function test_global_ref() {
+    global $obj;
+    $new = new stdclass;
+    $obj = &$new;
+}
+
+function test_global_noref() {
+    global $obj;
+    $new = new stdclass;
+    $obj = $new;
+}
+
+test_global_ref();
+var_dump($obj);
+test_global_noref();
+var_dump($obj);
+?>
+
+
+<?php
+function &get_instance_ref() {
+    static $obj;
+
+    echo 'Статический объект: ';
+    var_dump($obj);
+    if (!isset($obj)) {
+        $new = new stdclass;
+        // Присвоить ссылку статической переменной
+        $obj = &$new;
+    }
+    if (!isset($obj->property)) {
+        $obj->property = 1;
+    } else {
+        $obj->property++;
+    }
+    return $obj;
+}
+
+function &get_instance_noref() {
+    static $obj;
+
+    echo 'Статический объект: ';
+    var_dump($obj);
+    if (!isset($obj)) {
+        $new = new stdclass;
+        // Присвоить объект статической переменной
+        $obj = $new;
+    }
+    if (!isset($obj->property)) {
+        $obj->property = 1;
+    } else {
+        $obj->property++;
+    }
+    return $obj;
+}
+
+$obj1 = get_instance_ref();
+$still_obj1 = get_instance_ref();
+echo "\n";
+$obj2 = get_instance_noref();
+$still_obj2 = get_instance_noref();
+?>
+
+<!-- https://www.php.net/manual/ru/language.variables.scope.php-->
 </body>
 </html>

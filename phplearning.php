@@ -3,115 +3,61 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Объявление типов</title>
+	<title>Veriables(переменные)</title>
 </head>
 <body>
-
-<!-- Пример #1 Объявление типа для класса -->
-<?php 
-class C{}
-class D extends C{}
-
-class E{}
-
-function f(C $c){
-	echo get_class($c)."\n";
-}
-
-f(new C);
-f(new D);
-f(new E);
-?>
-
-<!-- Пример #2 Объявление типа для интерфейса -->
-<?php
-interface I { public function f(); }
-class C implements I { public function f() {} }
-
-// Не реализует интерфейс I.
-class E {}
-
-function f(I $i) {
-    echo get_class($i)."\n";
-}
-
-f(new C);
-f(new E);
-?>
-
-<!-- Пример #3 Объявление типа возвращаемого значения -->
-<?php 
-function sum($a, $b): float {
-	  return $a+$b;
-}
-
-var_dump(sum(1,2));
-?>
-
-
-<!-- Пример #4 Возвращение объекта -->
-<?php 
-class C{}
-
-function getC(): C{
-	return new C;
-}
-
-var_dump(getC());
-?>
-
-
-<!-- Пример #5 Объявление обнуляемых типов -->
-<?php 
-class C {}
-
-function f(?C $c){
-	var_dump($c);
-}
-
-f(new C);
-f(null);
-?>
-
-
-<!-- Пример #6 Обнуляемые типы для возвращаемого значения -->
-<?php 
-function get_item(): ?string {
-	if (isset($_GET['item'])){
-		return $_GET['item'];
-	} else {
-		return null;
-	}
-}
-?>
-
-
-<!-- Пример #7 Старый способ задавать обнуляемые типы для аргументов -->
-<?php 
-class C{}
-
-function f(C $c = null){
-	var_dump($c);
-}
-
-f(new C);
-f(null);
-?>
-
-<!-- Пример #8 Строгая типизация для значений аргументов -->
 <?php  
-declare(strict_types=1);
+$var = 'Боб';
+$Var = 'Джо';
 
-function sum(int $a, int $b){
-	return $a + $b;
-}
+echo "$var, $Var";
+?>
 
-var_dump(sum(1,2));
-var_dump(sum(1.5, 2.5));
+<?php  
+$foo = 'Боб';
+$bar = &$foo;
+$bar = "Меня зовут $bar";
+
+echo $bar;
+echo $foo;
+?>
+
+<!-- Пример #1 Значения по умолчанию в неинициализированных переменных -->
+<?php 
+// Неустановленная И не имеющая ссылок (то есть без контекста использования) переменная; выведет NULL
+var_dump($unset_var);
+
+
+
+// Булевое применение; выведет 'false' (Подробнее по этому синтаксису смотрите раздел о тернарном операторе)
+echo($unset_bool ? "true\n": "false\n");
+
+// Строковое использование; выведет 'string(3) "abc"'
+$unset_str .='abc';
+var_dump($unset_str);
+
+
+// Целочисленное использование; выведет 'int(25)'
+$unset_int +=25;
+var_dump($unset_int);															
+
+// Использование в качестве числа с плавающей точкой (float/double); выведет 'float(1.25)'
+$unset_float +=1.25;
+var_dump($unset_float);								
+
+// Использование в качестве массива; выведет array(1) {  [3]=>  string(3) "def" }
+$unset_arr[3]='def';
+var_dump($unset_arr);
+
+// Использование в качестве объекта; создаёт новый объект stdClass (смотрите http://www.php.net/manual/ru/reserved.classes.php)
+// Выведет: object(stdClass)#1 (1) {  ["foo"]=>  string(3) "bar" }
+$unset_obj->foo = 'bar';
+var_dump($unset_obj);
+
+
 ?>
 
 
-
-<!-- https://www.php.net/manual/ru/language.types.declarations.php -->
+<!-- https://www.php.net/manual/ru/language.variables.basics.php -->
 </body>
 </html>

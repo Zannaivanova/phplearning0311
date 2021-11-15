@@ -3,87 +3,115 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>4 смешанных типа: callable </title>
+	<title>Объявление типов</title>
 </head>
 <body>
-<!--Пример #2 Пример callback-функции с использованием замыкания --> 
 
+<!-- Пример #1 Объявление типа для класса -->
+<?php 
+class C{}
+class D extends C{}
+
+class E{}
+
+function f(C $c){
+	echo get_class($c)."\n";
+}
+
+f(new C);
+f(new D);
+f(new E);
+?>
+
+<!-- Пример #2 Объявление типа для интерфейса -->
 <?php
-// Наше замыкание
-$double = function($a) {
-    return $a * 2;
-};
+interface I { public function f(); }
+class C implements I { public function f() {} }
 
-// Диапазон чисел
-$numbers = range(1, 5);
+// Не реализует интерфейс I.
+class E {}
 
-// Использование замыкания в качестве callback-функции
-// для удвоения каждого элемента в нашем диапазоне
-$new_numbers = array_map($double, $numbers);
+function f(I $i) {
+    echo get_class($i)."\n";
+}
 
-print implode(' ', $new_numbers);
+f(new C);
+f(new E);
+?>
+
+<!-- Пример #3 Объявление типа возвращаемого значения -->
+<?php 
+function sum($a, $b): float {
+	  return $a+$b;
+}
+
+var_dump(sum(1,2));
+?>
+
+
+<!-- Пример #4 Возвращение объекта -->
+<?php 
+class C{}
+
+function getC(): C{
+	return new C;
+}
+
+var_dump(getC());
+?>
+
+
+<!-- Пример #5 Объявление обнуляемых типов -->
+<?php 
+class C {}
+
+function f(?C $c){
+	var_dump($c);
+}
+
+f(new C);
+f(null);
+?>
+
+
+<!-- Пример #6 Обнуляемые типы для возвращаемого значения -->
+<?php 
+function get_item(): ?string {
+	if (isset($_GET['item'])){
+		return $_GET['item'];
+	} else {
+		return null;
+	}
+}
+?>
+
+
+<!-- Пример #7 Старый способ задавать обнуляемые типы для аргументов -->
+<?php 
+class C{}
+
+function f(C $c = null){
+	var_dump($c);
+}
+
+f(new C);
+f(null);
+?>
+
+<!-- Пример #8 Строгая типизация для значений аргументов -->
+<?php  
+declare(strict_types=1);
+
+function sum(int $a, int $b){
+	return $a + $b;
+}
+
+var_dump(sum(1,2));
+var_dump(sum(1.5, 2.5));
 ?>
 
 
 
-<!-- Пример #1 Пример callback-функции -->
-
-<!-- // Пример callback-функции -->
-function my_callback_function(){
-	echo 'Привет, мир';
-}
-
-<!-- // Пример callback-метода -->
-class MyClass {
-	static function myCallbackMethod(){
-		echo 'Привет, мир';
-	}
-}
-
-<!-- // Тип 1: Простой callback -->
-call_user_func('my_callback_function');
-
-<!-- // Тип 2: Вызов статического метода класса -->
-call_user_func(array('MyClass','myCallbackMethod'));
-
-<!-- // Тип 3: Вызов метода класса -->
-$obj = new MyClass();
-call_user_func(array($obj, 'myCallbackMethod'));
-
-<!-- // Тип 4: Вызов статического метода класса -->
-call_user_func('MyClass::myCallbackMethod');
-
-<!-- // Тип 5: Вызов относительного статического метода -->
-class A{
-	public static function who(){
-		echo "A\n";
-	}
-}
-
-class B extends A{
-	public static function who(){
-		echo "B\n";
-	}
-}
-
-call_user_func(array('B', 'parent::who'));
-
-
-
-<!-- // Тип 6: Объекты, реализующие __invoke, могут быть использованы как callback -->
-class C{
-	public function __invoke($name){
-		echo 'ПРивет', $name, "\n";
-	}
-}
-
-$c = new C();
-call_user_func($c, 'PHP');
- ?>
-}
-
-
-<!-- https://www.php.net/manual/ru/language.types.callable.php -->	
- 
+<!-- https://www.php.net/manual/ru/language.types.declarations.php -->
 </body>
 </html>

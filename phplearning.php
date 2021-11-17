@@ -3,42 +3,18 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Константы: синтаксис</title>
+	<title>Предопределённые  и магические константы</title>
 </head>
 <body>
-<!-- Пример #1 Определение констант -->
-<?php  
-define("CONSTANT", "Здравствуй, мир");
-echo CONSTANT;
-echo Constant;
-?>
+<!-- Предопределённые константы -->
+//Объявленные в ядре константы . версии, данные, ворнинги
+
+<!-- https://www.php.net/manual/ru/language.constants.predefined.php -->
 
 
-<!-- Пример #2 Определение констант с помощью ключевого слова const -->
+<!-- Магические константы  -->
+//девять магических констант, которые меняют своё значение в зависимости от //контекста, в котором они используются. Например, значение __LINE__ зависит //от строки в скрипте, на которой эта константа указана
 
-<?php
-// Простое скалярное значение
-const CONSTANT = 'Здравствуй, мир.';
-
-echo CONSTANT;
-
-// Скалярное выражение
-const ANOTHER_CONST = CONSTANT.'; Прощай, мир.';
-echo ANOTHER_CONST;
-
-const ANIMALS = array('dog', 'cat', 'bird');
-echo ANIMALS[1]; // выводит "cat"
-
-// Массивы в константе
-define('ANIMALS', array(
-    'dog',
-    'cat',
-    'bird'
-));
-echo ANIMALS[1]; // выводит "cat"
-?>
-
-
-<!-- https://www.php.net/manual/ru/language.constants.syntax.php -->
-</body>
+<!-- https://www.php.net/manual/ru/language.constants.magic.php -->
+</body> 
 </html>

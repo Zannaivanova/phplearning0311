@@ -3,57 +3,51 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Переменные переменных</title>
+	<title>Переменные извне PHP</title>
 </head>
 <body>
-<?php  
-$a = 'hello';
-?>
 
-<?php  
-$$a = 'world';
-?>
-
-<!-- 2 варианта выводят один результат: -->
-
-<!-- 1.если вы напишете $$a[1], обработчику необходимо знать, хотите ли вы использовать $a[1] в качестве переменной -->
-
-<?php  
-echo "$a ${$a}";//${$a[1]}
-?>
-
-
-<!-- 2.либо вам нужна как переменная $$a, а затем её индекс [1] -->
+    <!-- Пример #3 Более сложные переменные формы -->
 <?php
-echo "$a $hello";//${$a}[1]
-?>
-
-
-
-
-
-<!-- Пример #1 Пример переменного имени свойства -->
-<?php  
-class foo{
-    var $bar = 'I am bar.';
-    var $arr = array('I am A.', 'I am B.', 'I am C.');
-    var $r = 'I am r.';
+if ($_POST) {
+    echo '<pre>';
+    echo htmlspecialchars(print_r($_POST, true));
+    echo '</pre>';
 }
+?>
+<form action="" method="post">
+    Имя:  <input type="text" name="personal[name]" /><br />
+    фото: <input type="image" src="image.gif" name="sub" />
+    Email: <input type="text" name="personal[email]" /><br />
+    Пиво: <br />
+    <select multiple name="beer[]">
+        <option value="warthog">Warthog</option>
+        <option value="guinness">Guinness</option>
+        <option value="stuttgarter">Stuttgarter Schwabenbräu</option>
+    </select><br />
+    <input type="submit" value="Отправь меня!" />
+</form>
 
-$foo = new foo();
-$bar = 'bar';
-$baz = array('foo', 'bar', 'baz', 'quux');
-echo $foo->$bar . "\n";
-echo $foo->{$baz[1]} . "\n";
 
-$start = 'b';
-$end = 'ar';
-echo $foo->{$start . $end} . "\n";
-
-$arr = 'arr';
-echo $foo->{$arr[1]} . "\n";
+<!-- HTTP Cookies -->
+<?php  
+setcookie("MyCookie[foo]", 'Testing 1', time()+3600);
+setcookie("MyCookie[bar]", 'Testing 2', time()+3600);
 ?>
 
-<!-- https://www.php.net/manual/ru/language.variables.variable.php -->
+<!-- Пример #4 Пример использования setcookie() -->
+<?php  
+if (isset($_COOKIE['count'])){
+    $count = $_COOKIE['count']+1;
+} else {
+    $count = 1;
+}
+setcookie('count', $count, time()+3600);
+setcookie("Cart[$count]", $item, time()+3600);
+?>
+
+
+
+<!-- https://www.php.net/manual/ru/language.variables.external.php -->
 </body>
 </html>

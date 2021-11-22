@@ -3,39 +3,85 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Функции: Возврат значений</title>
+	<title>Обращение к функциям через переменные</title>
 </head>
 <body>
-<?php  //Пример #1 Использование конструкции return
-function square($num){
-        return $num * $num;
+
+<?php //Пример #1 Работа с функциями посредством переменных
+function foo(){
+echo "В foo(); <br/>\n"; 
 }
-echo square(4);
+
+function bar($arg = ''){
+	echo "В bar(); аргумент был '$arg'.<br/>\n";
+}
+
+$func = 'foo';
+$func();
+
+$func = 'bar';
+$func('test');
+
+$func = 'echoit';
+$func('test');
 ?>
 
 
-<?php  //Пример #2 Возврат нескольких значений в виде массива
-function small_numbers(){
-        return [0,1,2];
+<?php //Пример #2 Обращение к методам класса посредством переменных
+class Foo
+{
+    function Variable()
+    {
+        $name = 'Bar';
+        $this->$name(); // Вызываем метод Bar()
+    }
+
+    function Bar()
+    {
+        echo "Это Bar";
+    }
 }
 
-// Деструктуризация массива будет собирать каждый элемент массива индивидуально
-[$zero, $onq, $two] = small_numbers();
-
-// До версии 7.1.0 единственной эквивалентной альтернативой было использование конструкции list().
-list($zero, $one, $two) = small_numbers();
+$foo = new Foo();
+$funcname = "Variable";
+$foo->$funcname();  // Обращаемся к $foo->Variable()
 ?>
 
-<?php  //Пример #3 Возврат результата по ссылке
-function &return_reference(){
-        return $someref;
+<?php  //Пример #3 Пример вызова переменного метода со статическим свойством
+class Foo{
+	static $variable = 'статическое свойство';
+	static function Variable(){
+		echo 'Вызов метода Variable';
+	}
 }
 
-$newref = & returns_reference();
+echo Foo::$variable;// Это выведет 'статическое свойство'. Переменная $variable будет разрешена в этой области видимости.
+$variable = "Variable";
+Foo::$variable();// Это вызовет $foo->Variable(), прочитав $variable из этой области видимости.
 ?>
 
 
 
-<!-- https://www.php.net/manual/ru/functions.returning-values.php-->
+<?php  //Пример #4 Сложные callable-функции
+class Foo{
+	static function bar(){
+		echo "bar\n";
+	}
+
+	function baz(){
+		echo "baz\n";
+	}
+}
+
+$func = array("Foo", "bar");
+$func();// выведет "bar"
+$func = array(new Foo, "baz");
+$func();// выведет "baz"
+$func = "Foo::bar";
+$func();// выведет "bar"
+?>
+
+
+<!-- https://www.php.net/manual/ru/functions.variable-functions.php-->
 </body> 
 </html>

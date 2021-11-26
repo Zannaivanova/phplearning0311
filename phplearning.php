@@ -3,67 +3,43 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Константы классов</title>
+	<title>Автоматическая загрузка классов</title>
 </head>
 <body>
 
+<?php  //Пример #1 Пример автоматической загрузки
+spl_autoload_register(function($class_name){
+	include $class_name . 'php';
+});
 
-<?php  //Пример #1 Объявление и использование константы
-class MyClass
-{
-    const CONSTANT = 'значение константы';
-
-    function showConstant() {
-        echo  self::CONSTANT . "\n";
-    }
-}
-
-echo MyClass::CONSTANT . "\n";
-
-$classname = "MyClass";
-echo $classname::CONSTANT . "\n";
-
-$class = new MyClass();
-$class->showConstant();
-
-echo $class::CONSTANT."\n";
+$obj = new MyClass1();
+$obj2 = new MyClass2();
 ?>
 
 
+<?php  //Пример #2 Ещё один пример автоматической загрузки
+spl_autoload_register(function($name){
+	var_dump($name);
+});
 
-<?php  //Пример #2 Пример использования ::class с пространством имён
-namespace foo {
-    class bar {
-    }
-
-    echo bar::class; // foo\bar
+class Foo implements ITEST{
 }
 ?>
 
 
-<?php  //Пример #3 Пример констант, заданных выражением
-const ONE = 1;
+<?php  //Пример #3 Автоматическая загрузка с перехватом исключения
 
-class foo{
-	const TWO = ONE *2;
-	const THREE = ONE + self::TWO;
-	const SENTENCE = 'значение константы THREE - '. self::THREE;
+spl_autoload_register(function($name){
+	echo "хочу загрузить $name .\n";
+	throw new Exeption ("Невозможно загрузить $name .\n");
+});
+
+try {
+	$obj = new NonLoadableClass();
+} catch (Exeption $e){
+	echo $e->getMessage(), "\n";
 }
 ?>
-
-
-<?php  //Пример #4 Модификаторы видимости констант класса, начиная с PHP 7.1.0
-class Foo{
-	public const BAR = 'bar';
-	private const BAZ = 'baz';
-}
-
-echo Foo::BAR, PHP_EOL;
-echo Foo::BAZ, PHP_EOL;
-
-
-?>
-
-<!-- https://www.php.net/manual/ru/language.oop5.constants.php-->
+<!-- https://www.php.net/manual/ru/language.oop5.autoload.php-->
 </body> 
 </html>

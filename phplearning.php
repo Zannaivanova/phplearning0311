@@ -3,60 +3,54 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Оператор разрешения области видимости (::)</title>
+	<title>Ключевое слово static</title>
 </head>
 <body>
 
-
-<?php//Пример #1 Использование :: вне объявления класса
-class MyClass{
-	const CONST_VALUE = 'Значение константы';
-}
-
-$classname = 'MyClass';
-echo $classname::CONST_VALUE;
-
-echo MyClass::CONST_VALUE;
-?>
-
-
-<?php  //Пример #2 Использование :: внутри объявления класса
-class OtherClass extends MyClass{
-	public static $my_static = 'статическая переменная';
-
-	public static function doubleColon(){
-		echo parent::CONST_VALUE . "\n";
-		echo self::$my_static . "\n";
+<?php  //Пример #1 Пример статического метода
+class Foo{
+	public static function aStaticMethod(){
+		//...
 	}
 }
 
-$classname = 'OtherClass';
-$classname::doubleColon();
-
-OtherClass::doubleColon();
+Foo::aStaticMethod();
+$classname = 'Foo';
+$classname::aStaticMethod();
 ?>
 
 
 
-<?php//Пример #3 Обращение к методу в родительском классе
-class MyClass{
-	protected function myFunc(){    // Переопределить родительское определение
-		echo "MyClass::myFunc()\n";
-	}
-}  
+<?php  //Пример #2 Пример статического свойства
+class Foo{
+	public static $my_static = 'foo';
 
-class OtherClass extends MyClass{
-	public function myFunc(){        // Но всё ещё вызываем родительскую функцию
-		parent::myFunc();
-		echo "OtherClass::myFunc()\n";
+	public function staticValue(){
+		return self::$my_static;
 	}
 }
 
-$class = new OtherClass();
-$class->myFunc();
+class Bar extends Foo{
+	public function fooStatic(){
+		return parent::$my_static;
+	}
+}
+
+print Foo::$my_static . "\n";
+
+$foo = new Foo();
+print $foo->staticValue() . "\n";
+print $foo->my_static . "\n";
+
+print $foo::$my_static . "\n";
+$classname = 'Foo';
+print $classname::$my_static . "\n";
+
+print Bar::$my_static . "\n";
+$bar = new Bar();
+print $bar->fooStatic() . "\n";
 ?>
 
-
-<!-- https://www.php.net/manual/ru/language.oop5.paamayim-nekudotayim.php -->
+<!-- https://www.php.net/manual/ru/language.oop5.static.php -->
 </body> 
 </html>

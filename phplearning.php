@@ -3,169 +3,280 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Интерфейсы объектов</title>
+	<title>Трейты</title>
 </head>
 <body>
 
-
-<?php //Пример #1 Пример интерфейса
-
-// Объявим интерфейс 'Template'
-interface Template
-{
-    public function setVariable($name, $var);
-    public function getHtml($template);
+<?php//Пример #1 Пример использования трейта
+trait ezcReflectionReturnInfo {
+function getReturnType(){/*1*/}
+function getReturnDescription(){/*2*/}
 }
 
-// Реализация интерфейса
-// Это будет работать
-class WorkingTemplate implements Template
-{
-    private $vars = [];
-
-    public function setVariable($name, $var)
-    {
-        $this->vars[$name] = $var;
-    }
-
-    public function getHtml($template)
-    {
-        foreach($this->vars as $name => $value) {
-            $template = str_replace('{' . $name . '}', $value, $template);
-        }
-
-        return $template;
-    }
+class ezcReflectionMethod extends ReflectionMethod {
+	use ezcReflectionReturnInfo;
+	....
 }
 
-// Это не будет работать
-// Fatal error: Class BadTemplate contains 1 abstract methods
-// and must therefore be declared abstract (Template::getHtml)
-// (Фатальная ошибка: Класс BadTemplate содержит 1 абстрактный метод
-// и поэтому должен быть объявлен абстрактным (Template::getHtml))
-class BadTemplate implements Template
-{
-    private $vars = [];
-
-    public function setVariable($name, $var)
-    {
-        $this->vars[$name] = $var;
-    }
+class ezcReflectionFunction extends ReflectionFunction {
+	use ezcReflectionReturnInfo;
+	....
 }
-?>
+ ?>
 
 
-<?php  //Пример #2 Наследование интерфейсов
-interface A{
-	public function foo();
-}
-
-interface B extends A{
-	public function baz(Baz $baz);
-}
-
-class C implements B{
-	public function foo()
-	{}
-
-	public function baz(Baz $baz){}
-}
-
-class D implements B{
-	public function foo(){}
-
-	public function baz(Foo $foo)
-}
-?>
-
-
-
-<?php  //Пример #3 Множественное наследование интерфейсов
-interface A{
-	public function foo();
-}
-
-interface B{
-	public function bar();
-}
-
-interface C extends A,B {
-public function baz();
-}
-
-class D implements C{
-	public function foo(){}
-	public function bar(){}
-	public function baz(){}
-}
-?>
-
-
-<?php  //Пример #4 Интерфейсы с константами
-interface A {
-	const B = 'Константа интерфейса';
-}	
-;
-}
-
-// Выведет: Константа интерфейса
-echo A::B;
-
-
-// Это, однако, не будет работать, так как
-// константы переопределять нельзя.
-	class B implements A{
-		const B = 'Константа класса';
-	}
-?>
-
-
-<?php  //Пример #5 Интерфейсы с абстрактными классами
-interface A{
-	public function foo(string $s); string;
-
-	public function bar(int $i): int;
-}
-
-// Абстрактный класс может реализовывать только часть интерфейса.
-// Классы, расширяющие абстрактный класс, должны реализовать все остальные.
-
-abstract class B implements A{
-	public function foo(string $s): string{
-		return $s .PHP_EOL;
+<?php//Пример #2 Пример приоритета старшинства
+class Base  {
+	public function sayHello(){
+		echo 'Hello';
 	}
 }
 
-class C extends B{
-	public function bar(int $i):int{
-		return$i*2;
+trait SayWorld {
+	public function sayHello(){
+		parent::sayHello();
+		echo 'World!';
+	}
+}
+
+class MyHelloWorld extends Base {
+	use SayWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+?>
+
+
+
+<?php//Пример #3 Пример альтернативного порядка приоритета
+trait HelloWorld {
+    public function sayHello() {
+        echo 'Hello World!';
+    }
+}
+
+class TheWorldIsNotEnough {
+    use HelloWorld;
+    public function sayHello() {
+        echo 'Hello Universe!';
+    }
+}
+
+$o = new TheWorldIsNotEnough();
+$o->sayHello();
+?>
+
+
+<?php  //Пример #4 Пример использования нескольких трейтов
+trait Hello {
+	public function sayHello(){
+		echo 'Hello';
+	}
+}
+
+trait World {
+	public function sayWorld(){
+		echo 'World';
+	}
+}
+
+class MyHelloWorld {
+	use Hello, World;
+	public function sayExclamationMark(){
+		echo '!';
+	}
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+$o->sayWorld();
+$o->sayExclamationMark();
+?>
+
+
+<?php  //Пример #5 Пример разрешения конфликтов
+trait A{
+	public function smallTalk(){
+		echo 'a';
+	}
+
+	public function bigTalk(){
+		echo 'A';
+	}
+}
+
+trait B {
+	public function smallTalk(){
+		echo 'b';
+	}
+	public function bigTalk(){
+		echo 'B';
+	}
+}
+
+class Talker {
+	use A,B {
+		B::smallTalk insteadof A;
+		A::bigTalk insteadof B;
+	}
+}
+
+class Aliased_Talker {
+	use A, B {
+		B::smallTalk insteadof A;
+		A::bigTalk insteadof B;
+		B::bigTalk as talk;
 	}
 }
 ?>
 
-
-
-<?php  //Пример #6 Одновременное расширение и внедрение
-class One{
-
+<?php  //Пример #6 Пример изменения видимости метода
+trait HelloWorld {
+	public function sayHello(){
+		echo 'Hello World!';
+	}
 }
 
-interface  Usable{
-
+class MyClass1 {// Изменение видимости метода sayHello
+	use HelloWorld {
+		sayHello as protected;
+	}
 }
+// Создание псевдонима метода с изменённой видимостью
+// видимость sayHello не изменилась
 
-interface Updatable{
-
-}
-
-}
-
-// Порядок ключевых слов здесь важен. "extends" должно быть первым.
-class Two extends One implements Usable, Updatable{
-
+class MyClass2 {
+	use HelloWorld { sayHello as private myPrivateHello;}
 }
 ?>
 
-<!-- https://www.php.net/manual/ru/language.oop5.interfaces.php -->
+
+<?php //Пример #7 Пример трейтов, составленных из трейтов
+trait Hello {
+	public function sayHello(){
+		echo "Hello";
+	}
+} 
+
+trait World {
+	public function sayWorld(){
+		echo 'World!';
+	}
+}
+
+trait HelloWorld {
+	use Hello, World;
+}
+
+class MyHelloWorld {
+	use HelloWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+$o->sayWorld();
+?>
+
+<?php  //Пример #8 Требования трейта при помощи абстрактных методов
+trait Hello {
+	public function sayHelloWorld(){
+		echo 'Hello'.$this->getWorld();
+	}
+	abstract public function getWorld();
+}
+
+class MyHelloWorld {
+	private $world;
+	use Hello;
+	public function getWorld(){
+		return $this->world;
+	}
+
+	public function setWorld($val){
+		$this->world = $val;
+	}
+}
+?>
+
+
+<?php  //Пример #9 Статические переменные
+trait Counter {
+	public function inc (){
+		static $c = 0;
+		$c = $c+1;
+		echo "$c\n";
+	}
+}
+
+class C1 {
+	use Counter;
+}
+
+class C2 {
+	use Counter;
+}
+
+$o = new C1(); $o->inc();
+$p = new C2(); $p-> inc();
+?>
+
+
+<?php  //Пример #10 Статические методы
+trait StaticExample {
+	public static function doSomething(){
+		return 'Что-либо делаем';
+	}
+}
+
+class Example {
+	use StaticExample;
+}
+
+Example::doSomething();
+?>
+
+
+<?php//Пример #11 Статические свойства
+trait StaticExample {
+	public static $static = 'foo';
+}  
+
+class Example {
+	use StaticExample;
+}
+
+echo Example::$static;
+?>
+
+
+<?php//Пример #12 Определение свойств
+trait PropertiesTrait {
+	public $x = 1;
+} 
+
+class PropertiesExample{
+	use PropertiesTrait;
+}
+
+$example = new PropertiesExample;
+$example->x;
+ ?>
+
+
+ <?php //Пример #13 Разрешение конфликтов
+ trait PropertiesTrait {
+    public $same = true;
+    public $different = false;
+}
+
+class PropertiesExample {
+    use PropertiesTrait;
+    public $same = true;
+    public $different = true; // Фатальная ошибка
+}
+  ?>
+
+<!-- https://www.php.net/manual/ru/language.oop5.traits.php -->
 </body> 
 </html>

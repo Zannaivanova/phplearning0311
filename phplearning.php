@@ -3,75 +3,169 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Абстрактные классы</title>
+	<title>Интерфейсы объектов</title>
 </head>
 <body>
 
-<?php //Пример #1 Пример абстрактного класса
-abstract class AbstractClass
-{
-   /* Данный метод должен быть определён в дочернем классе */
-    abstract protected function getValue();
-    abstract protected function prefixValue($prefix);
 
-   /* Общий метод */
-    public function printOut() {
-        print $this->getValue() . "\n";
+<?php //Пример #1 Пример интерфейса
+
+// Объявим интерфейс 'Template'
+interface Template
+{
+    public function setVariable($name, $var);
+    public function getHtml($template);
+}
+
+// Реализация интерфейса
+// Это будет работать
+class WorkingTemplate implements Template
+{
+    private $vars = [];
+
+    public function setVariable($name, $var)
+    {
+        $this->vars[$name] = $var;
+    }
+
+    public function getHtml($template)
+    {
+        foreach($this->vars as $name => $value) {
+            $template = str_replace('{' . $name . '}', $value, $template);
+        }
+
+        return $template;
     }
 }
 
-class ConcreteClass1 extends AbstractClass
+// Это не будет работать
+// Fatal error: Class BadTemplate contains 1 abstract methods
+// and must therefore be declared abstract (Template::getHtml)
+// (Фатальная ошибка: Класс BadTemplate содержит 1 абстрактный метод
+// и поэтому должен быть объявлен абстрактным (Template::getHtml))
+class BadTemplate implements Template
 {
-    protected function getValue() {
-        return "ConcreteClass1";
-    }
+    private $vars = [];
 
-    public function prefixValue($prefix) {
-        return "{$prefix}ConcreteClass1";
+    public function setVariable($name, $var)
+    {
+        $this->vars[$name] = $var;
     }
 }
-
-class ConcreteClass2 extends AbstractClass
-{
-    public function getValue() {
-        return "ConcreteClass2";
-    }
-
-    public function prefixValue($prefix) {
-        return "{$prefix}ConcreteClass2";
-    }
-}
-
-$class1 = new ConcreteClass1;
-$class1->printOut();
-echo $class1->prefixValue('FOO_') ."\n";
-
-$class2 = new ConcreteClass2;
-$class2->printOut();
-echo $class2->prefixValue('FOO_') ."\n";
 ?>
 
 
-<?php //Пример #2 Пример абстрактного класса
-
-abstract class AbstractClass{    // Наш абстрактный метод требует только определить необходимые аргументы
-        abstract protected function prefixName($name);
+<?php  //Пример #2 Наследование интерфейсов
+interface A{
+	public function foo();
 }
 
-class ConcreteClass extends AbstractClass{    // Наш дочерний класс может определить необязательные аргументы, не указанные в объявлении родительского метода
-	public function prefixName($name, $separator = "."){
-		if ($name == "Pacman"){
-			$prefix = "Mr";
-		} elseif ($name == "Pacwoman"){
-			$prefix = "Mrs"; 
-		} return "{$prefix}{$separator} {$name}";
+interface B extends A{
+	public function baz(Baz $baz);
+}
+
+class C implements B{
+	public function foo()
+	{}
+
+	public function baz(Baz $baz){}
+}
+
+class D implements B{
+	public function foo(){}
+
+	public function baz(Foo $foo)
+}
+?>
+
+
+
+<?php  //Пример #3 Множественное наследование интерфейсов
+interface A{
+	public function foo();
+}
+
+interface B{
+	public function bar();
+}
+
+interface C extends A,B {
+public function baz();
+}
+
+class D implements C{
+	public function foo(){}
+	public function bar(){}
+	public function baz(){}
+}
+?>
+
+
+<?php  //Пример #4 Интерфейсы с константами
+interface A {
+	const B = 'Константа интерфейса';
+}	
+;
+}
+
+// Выведет: Константа интерфейса
+echo A::B;
+
+
+// Это, однако, не будет работать, так как
+// константы переопределять нельзя.
+	class B implements A{
+		const B = 'Константа класса';
 	}
-} 
-$class = new ConcreteClass;
-echo $class->prefixName("Pacman"), "\n";
-echo $class-> prefixName("Pacwoman"), "\n";
 ?>
 
-<!-- https://www.php.net/manual/ru/language.oop5.abstract.php -->
+
+<?php  //Пример #5 Интерфейсы с абстрактными классами
+interface A{
+	public function foo(string $s); string;
+
+	public function bar(int $i): int;
+}
+
+// Абстрактный класс может реализовывать только часть интерфейса.
+// Классы, расширяющие абстрактный класс, должны реализовать все остальные.
+
+abstract class B implements A{
+	public function foo(string $s): string{
+		return $s .PHP_EOL;
+	}
+}
+
+class C extends B{
+	public function bar(int $i):int{
+		return$i*2;
+	}
+}
+?>
+
+
+
+<?php  //Пример #6 Одновременное расширение и внедрение
+class One{
+
+}
+
+interface  Usable{
+
+}
+
+interface Updatable{
+
+}
+
+}
+
+// Порядок ключевых слов здесь важен. "extends" должно быть первым.
+class Two extends One implements Usable, Updatable{
+
+}
+?>
+
+<!-- https://www.php.net/manual/ru/language.oop5.interfaces.php -->
 </body> 
 </html>

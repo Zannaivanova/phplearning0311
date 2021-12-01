@@ -3,90 +3,109 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Анонимные классы</title>
+	<title>Перегрузка</title>
 </head>
 <body>
-
-<?php//Анонимные классы
-// Использование явного класса
-class Logger
+ 
+<?php  //Пример #1 Перегрузка свойств с помощью методов __get(), __set(), __isset() и __unset() 
+class PropertyTest
 {
-    public function log($msg)
+    /**  Место хранения перегружаемых данных.  */
+    private $data = array();
+
+    /**  Перегрузка не применяется к объявленным свойствам.  */
+    public $declared = 1;
+
+    /**  Здесь перегрузка будет использована только при доступе вне класса.  */
+    private $hidden = 2;
+
+    public function __set($name, $value)
     {
-        echo $msg;
+        echo "Установка '$name' в '$value'\n";
+        $this->data[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        echo "Получение '$name'\n";
+        if (array_key_exists($name, $this->data)) {
+            return $this->data[$name];
+        }
+
+        $trace = debug_backtrace();
+        trigger_error(
+            'Неопределённое свойство в __get(): ' . $name .
+            ' в файле ' . $trace[0]['file'] .
+            ' на строке ' . $trace[0]['line'],
+            E_USER_NOTICE);
+        return null;
+    }
+
+    public function __isset($name)
+    {
+        echo "Установлено ли '$name'?\n";
+        return isset($this->data[$name]);
+    }
+
+    public function __unset($name)
+    {
+        echo "Уничтожение '$name'\n";
+        unset($this->data[$name]);
+    }
+
+    /**  Не магический метод, просто для примера. */
+    public function getHidden()
+    {
+        return $this->hidden;
     }
 }
 
-$util->setLogger(new Logger());
 
-// Использование анонимного класса
-$util->setLogger(new class {
-    public function log($msg)
-    {
-        echo $msg;
+echo "<pre>\n";
+
+$obj = new PropertyTest;
+
+$obj->a = 1;
+echo $obj->a . "\n\n";
+
+var_dump(isset($obj->a));
+unset($obj->a);
+var_dump(isset($obj->a));
+echo "\n";
+
+echo $obj->declared . "\n\n";
+
+echo "Давайте поэкспериментируем с закрытым свойством 'hidden':\n";
+echo "Закрытые свойства видны внутри класса, поэтому __get() не используется...\n";
+echo $obj->getHidden() . "\n";
+echo "Закрытые свойства не видны вне класса, поэтому __get() используется...\n";
+echo $obj->hidden . "\n";
+?>
+
+
+<?php  // Пример #2 Перегрузка методов с помощью методов __call() и __callStatic() 
+class MethodTest {
+    public function __call($name, $arguments) {
+        // Замечание: значение $name регистрозависимо.
+        echo "Вызов метода '$name' "
+             . implode(', ', $arguments). "\n";
     }
-});
-?>
 
-
-<?php  
-class SomeClass {}
-interface SomeInterface {}
-trait SomeTrait {}
-
-var_dump(new class(10) extends SomeClass implements SomeInterface {
-    private $num;
-
-    public function __construct($num)
-    {
-        $this->num = $num;
+    public static function __callStatic($name, $arguments) {
+        // Замечание: значение $name регистрозависимо.
+        echo "Вызов статического метода '$name' "
+             . implode(', ', $arguments). "\n";
     }
+}
 
-    use SomeTrait;
-});
+$obj = new MethodTest;
+$obj->runTest('в контексте объекта');
+
+MethodTest::runTest('в статическом контексте');
 ?>
 
 
-<?php 
-class Outer {
-	private $prop = 1;
-	protected $prop2 = 2;
 
-	protected function func1(){
-		return 3;
-	}
-
-	public function func2(){
-		return new class($this->prop) extends Outer {
-			private $prop3;
-
-			public function __construct($prop){
-				$this->prop3=$prop;
-			}
-
-			public function func3(){
-				return $this->prop2 + $this->prop3 +$this->func1();
-			}
-		};
-	}
-}
-echo (new Outer)->func2()->func3();
- ?>
-
-
-<?php  
-function anonymous_class(){
-	return new class {};
-}
-	if (get_class(anonymous_class())===get_class(anonymous_class())){
-		echo 'Тот же класс';
-	} else {
-		echo 'Другой класс';
-	}
-
-?>
-
-
-<!-- https://www.php.net/manual/ru/language.oop5.anonymous.php -->
+<!-- https://www.php.net/manual/ru/language.oop5.overloading.php -->
 </body> 
 </html>

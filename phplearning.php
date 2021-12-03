@@ -3,56 +3,112 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Сравнение объектов</title>
+	<title>Позднее статическое связывание</title>
 </head>
 <body>
 
-<?php  //Пример #1 Пример сравнения объектов
-
-function bool2str($bool){
-    return (string) $bool;
-}
-
-function compareObjects(&$o1, &$o2){
-    echo '01==o2: '. bool2str($o1==$o2) . "\n";
-    echo 'o1!=o2: '. bool2str($o1!=$o2) . "\n";
-    echo 'o1 ===o2: '. bool2str($o1 ===$o2) . "\n";
-    echo 'o1!==o2: '. bool2str($o1!==$o2) . "\n";
-}
-
-class Flag{
-    public $flag;
-    function __construct($flag = true){
-        $this->flag = $flag;
+    <?php  //Пример #1 Использование self::
+    class A {
+        public static function who(){
+            echo __CLASS__;
+            }
+        public static function test(){
+            self::who();
+        }
     }
-}
 
-class OtherFlag{
-    public $flag;
-
-    function __construct($flag = true){
-        $this->flag = $flag;
+class B extends A{
+    public static function who(){
+        echo __CLASS__;
     }
-}
+}    
 
-$o = new Flag();
-$p = new Flag();
-$q = $o;
-$r = new OtherFlag();
-
-echo "Два экземпляра олного и того же класса\n";
-compareObjects($o, $p);
-
-echo "\nДве ссылки на один и тот же экземпляр\n";
-compareObjects($o, $q);
-
-echo "\nЭкземпляры двух разных классов\n";
-compareObjects($o, $r);
-
-
+B::test();
 ?>
 
-<!-- https://www.php.net/manual/ru/language.oop5.object-comparison.php -->
 
+<?php //Пример #2 Простое использование static::
+class A {
+    public static function who(){
+        echo __CLASS__;
+    }
+
+    public static function test(){
+        static::who();// Здесь действует позднее статическое связывание
+    }
+}  
+
+class B extends A{
+    public static function who(){
+        echo __CLASS__;
+    }
+}
+
+B::test();
+?>
+
+
+<?php  //Пример #3 Использование static:: в нестатическом контексте
+class A{
+    private function foo(){
+        echo "success!\n";
+    }
+
+    public function test(){
+        $this->foo();
+        static::foo();
+    }
+}
+
+class B extends A{
+     /* foo() будет скопирован в В, следовательно его область действия по прежнему А,
+      и вызов будет успешным */
+}
+
+class C extends A{
+    private function foo(){
+                /* исходный метод заменён; область действия нового метода - С */
+    }
+}
+
+$b = new B();
+$b->test();
+$c = new C();
+$c->test();   // потерпит ошибку
+?>
+
+
+<?php  //Пример #4 Перенаправленные и неперенаправленные вызовы
+class A {
+    public static function foo(){
+        static::who();
+    }
+
+    public static function who(){
+        echo __CLASS__ . "\n";
+    }
+}
+
+class B extends A{
+    public static function test(){
+        A::foo();
+        parent::foo();
+        self::foo();
+    }
+
+    public static function who(){
+        echo __CLASS__ . "\n";
+    }
+}
+
+class C extends B{
+    public static function who(){
+        echo __CLASS__ ."\n";
+    }
+}
+
+C::test();
+?>
+<!-- https://www.php.net/manual/ru/language.oop5.late-static-bindings.php -->
 </body> 
 </html>

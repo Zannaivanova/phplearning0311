@@ -3,148 +3,65 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Магические методы</title>
+	<title>Ключевое слово final</title>
 </head>
 <body>
 
-<?php  //Магические методы
-class Connection{
-    protected $link;
-    private $dsn, $username, $password;
-
-    public function __construct($dsn, $username, $password){
-        $this->dsn = $dsn;
-        $this->username = $username;
-        $this->password = $password;
-        $this->connect();
+<?php  //Пример #1 Пример окончательных (final) методов
+class BAseClass{
+    public function test(){
+        echo 'Вызван метод BaseClass::test()\n';
     }
 
-    private function connect(){
-        $this->link = new PDO($this->dsn, $this->username, $this->password);
-    }
-
-    public function __sleep(){
-        return array('dsn', 'username', 'password');
-    }
-
-    public function __wakeup(){
-        $this->connect();
+    final public function moreTesting(){
+        echo "Вызван метод BaseClass::moreTesting()\n";
     }
 }
+
+class ChildClass extends BaseClass{
+    public function moreTesting(){
+        echo "Вызван метод ChildClass::moreTesting()\n";
+    }
+}
+
+// Выполнение заканчивается фатальной ошибкой: Cannot override final method BaseClass::moreTesting()
+// (Метод BaseClass::moretesting() не может быть переопределён)
 ?>
 
-<?php  //Пример #2 Сериализация и десериализация
-class Connection{
-    protected $link;
-    private $dsn, $username, $password;
 
-    public function __construct($dsn, $username, $password){
-        $this->dsn = $dsn;
-        $this->username = $username;
-        $this->password = $password;
-        $this->connect();
+<?php //Пример #2 Пример окончательного (final) класса
+final class BaseClass{
+    public function test(){
+        echo "Вызван метод BaseClass::test()\n";
     }
-
-    private function connect(){
-        $this-> link = new PDO($this->dsn, $this->username, $this->password);
-    }
-
-    public function __serialize(): array{
-        return[
-            'dsn'=>$this->dsn,
-            'user'=>$this->username,
-            'pass'=>$this->password,
-             ];
-    }
-
-    public function __unserialize(array $data): void{
-        $this->dsn = $data['dsn'];
-        $this->username = $data['user'];
-        $this->password = $data['pass'];
-
-        $this->connect();
-    }
-}?>
-
-
-<?php //Пример #3 Простой пример __toString
-class TestClass{
-    public $foo;
-
-    public function __construct($foo){
-        $this->foo = $foo;
-    }
-
-    public function __toString(){
-        return $this->foo;
+   // Поскольку класс уже является final, ключевое слово final является избыточным
+    final public function moreTesting(){
+        echo "BaseClass::moreTesting() called\n";
     }
 }
+ class ChildClass extends BaseClass{
+ }
 
-$class = new TestClass('Привет');
-echo $class;
-  ?>
-
-
-  <?php //Пример #4 Использование __invoke()
-  class CalllableClass{
-    public function __invoke($x){
-        var_dump($x);
-    }
-  }
-
-$obj = new CallableClass;
-$obj(5);
-var_dump(is_callable($obj));
-   ?>
-
-
-<?php //Пример #5 Использование __set_state()
-
-class A{
-    public $var1;
-    public $var2;
-
-    public static function __set_state($an_array){
-        $obj = new A;
-        $obj->var1 = $an_array['var1'];
-        $obj->var2 = $an_array['var2'];
-        return $obj;
-    }
-}
-
-$a = new A;
-$a->var1 = 5;
-$a->var2 = 'foo';
-
-$b = var_export($a, true);
-var_dump($b);
-eval('$c = ' . $b . ';');
-var_dump($c);
- ?>
-
-
-<?php //Пример #6 Использование __debugInfo()
-class C{
-    private $prop;
-
-    public function __construct($val){
-        $this->prop = $val;
-    }
-
-    public function __debugInfo(){
-        return [
-            'propSquared'=>$this->prop **2,
-        ];
-    }
-}
-
-var_dump(new C(42));
-
-
+ // Выполнение заканчивается фатальной ошибкой: Class ChildClass may not inherit from final class (BaseClass)
+// (Класс ChildClass не может быть унаследован от окончательного класса (BaseClass))
  ?>
 
 
 
-<!-- https://www.php.net/manual/ru/language.oop5.magic.php -->
+ <?php  //Пример #3 Пример окончательной (final) константы класса, начиная с PHP 8.1.0
+
+ class Foo{
+    final public const X = "foo";
+ }
+
+ class Bar extends Foo{
+    public const X = "bar";
+ }
+// Ошибка: Bar::X не может переопределить окончательную константу Foo::X
+?>
+
+
+
+<!-- https://www.php.net/manual/ru/language.oop5.final.php -->
 </body> 
 </html>

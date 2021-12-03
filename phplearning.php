@@ -3,65 +3,59 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Ключевое слово final</title>
+	<title>Клонирование объектов</title>
 </head>
 <body>
 
-<?php  //Пример #1 Пример окончательных (final) методов
-class BAseClass{
-    public function test(){
-        echo 'Вызван метод BaseClass::test()\n';
+<?php //Пример #1 Клонирование объекта
+class SubObject{
+    static $instances = 0;
+    public $instance;
+
+    public function __construct(){
+        $this->instance = ++self::$instances;
     }
 
-    final public function moreTesting(){
-        echo "Вызван метод BaseClass::moreTesting()\n";
-    }
-}
-
-class ChildClass extends BaseClass{
-    public function moreTesting(){
-        echo "Вызван метод ChildClass::moreTesting()\n";
+    public function __clone(){
+        $this->instance = ++self::$instances;
     }
 }
 
-// Выполнение заканчивается фатальной ошибкой: Cannot override final method BaseClass::moreTesting()
-// (Метод BaseClass::moretesting() не может быть переопределён)
-?>
+class MyCloneable{
+    public $object1;
+    public $object2;
 
-
-<?php //Пример #2 Пример окончательного (final) класса
-final class BaseClass{
-    public function test(){
-        echo "Вызван метод BaseClass::test()\n";
-    }
-   // Поскольку класс уже является final, ключевое слово final является избыточным
-    final public function moreTesting(){
-        echo "BaseClass::moreTesting() called\n";
+    function __clone(){
+// Принудительно копируем this->object, иначе
+// он будет указывать на один и тот же объект.
+        $this->oblect1 = clone $this->object1;
     }
 }
- class ChildClass extends BaseClass{
- }
 
- // Выполнение заканчивается фатальной ошибкой: Class ChildClass may not inherit from final class (BaseClass)
-// (Класс ChildClass не может быть унаследован от окончательного класса (BaseClass))
+$obj = new MyCloneable();
+
+$obj->object1 = new SubObject();
+$obj->object2 = new SubObject();
+
+$obj2 = clone $obj;
+
+print("Оригинальный объект:  \n");
+print_r($obj);
+
+
+print("Клонированный объект:  \n");
+print_r($obj2);
  ?>
 
 
+ <?php  //Пример #2 Доступ к только что склонированному объекту
 
- <?php  //Пример #3 Пример окончательной (final) константы класса, начиная с PHP 8.1.0
-
- class Foo{
-    final public const X = "foo";
- }
-
- class Bar extends Foo{
-    public const X = "bar";
- }
-// Ошибка: Bar::X не может переопределить окончательную константу Foo::X
-?>
+ $dateTime = new DateTime();
+ echo (clone $dateTime)->format('Y');
+ ?>
 
 
+<!-- https://www.php.net/manual/ru/language.oop5.cloning.php -->
 
-<!-- https://www.php.net/manual/ru/language.oop5.final.php -->
 </body> 
 </html>

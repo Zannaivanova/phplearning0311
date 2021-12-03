@@ -3,59 +3,56 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Клонирование объектов</title>
+	<title>Сравнение объектов</title>
 </head>
 <body>
 
-<?php //Пример #1 Клонирование объекта
-class SubObject{
-    static $instances = 0;
-    public $instance;
+<?php  //Пример #1 Пример сравнения объектов
 
-    public function __construct(){
-        $this->instance = ++self::$instances;
-    }
+function bool2str($bool){
+    return (string) $bool;
+}
 
-    public function __clone(){
-        $this->instance = ++self::$instances;
+function compareObjects(&$o1, &$o2){
+    echo '01==o2: '. bool2str($o1==$o2) . "\n";
+    echo 'o1!=o2: '. bool2str($o1!=$o2) . "\n";
+    echo 'o1 ===o2: '. bool2str($o1 ===$o2) . "\n";
+    echo 'o1!==o2: '. bool2str($o1!==$o2) . "\n";
+}
+
+class Flag{
+    public $flag;
+    function __construct($flag = true){
+        $this->flag = $flag;
     }
 }
 
-class MyCloneable{
-    public $object1;
-    public $object2;
+class OtherFlag{
+    public $flag;
 
-    function __clone(){
-// Принудительно копируем this->object, иначе
-// он будет указывать на один и тот же объект.
-        $this->oblect1 = clone $this->object1;
+    function __construct($flag = true){
+        $this->flag = $flag;
     }
 }
 
-$obj = new MyCloneable();
+$o = new Flag();
+$p = new Flag();
+$q = $o;
+$r = new OtherFlag();
 
-$obj->object1 = new SubObject();
-$obj->object2 = new SubObject();
+echo "Два экземпляра олного и того же класса\n";
+compareObjects($o, $p);
 
-$obj2 = clone $obj;
+echo "\nДве ссылки на один и тот же экземпляр\n";
+compareObjects($o, $q);
 
-print("Оригинальный объект:  \n");
-print_r($obj);
-
-
-print("Клонированный объект:  \n");
-print_r($obj2);
- ?>
-
-
- <?php  //Пример #2 Доступ к только что склонированному объекту
-
- $dateTime = new DateTime();
- echo (clone $dateTime)->format('Y');
- ?>
+echo "\nЭкземпляры двух разных классов\n";
+compareObjects($o, $r);
 
 
-<!-- https://www.php.net/manual/ru/language.oop5.cloning.php -->
+?>
+
+<!-- https://www.php.net/manual/ru/language.oop5.object-comparison.php -->
 
 </body> 
 </html>

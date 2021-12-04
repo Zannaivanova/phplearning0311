@@ -3,31 +3,26 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Обзор пространств имён</title>
+	<title>Определение пространств имён</title>
 </head>
 <body>
 
-<?php//Пример #1 Пример синтаксиса, использующего пространство имён
-namespace my\name;// смотрите раздел "Определение пространств имён"
-class MyClass{}
-function myfuncion(){}
-const MYCONST = 1;
+<?php  //Пример #1 Объявление единого пространства имён
+namespace MyProject;
 
-$a = new MyClass;
-$c = new \my\name\MyClass;// смотрите раздел "Глобальная область видимости"
-
-$a = strlen('hi');// смотрите раздел "Использование пространств имён: возврат
-                   // к глобальной функции/константе"
-
-$d = namespace\MYCONST;// смотрите раздел "оператор пространства имён и
-                        // константа __NAMESPACE__"
-
-$d = __NAMESPACE__ . '\MYCONST';
-
-echo constant($d);// смотрите раздел "Пространства имён и динамические особенности языка"
+const CONNECT_OK = 1;
+class Connection {/*...*/}
+function connect(){/*...*/}
 ?>
 
 
-<!-- https://www.php.net/manual/ru/language.namespaces.rationale.php -->
+<?php  //Пример #2 Объявление простого пространства имён
+// <html>
+// <?php
+// namespace MyProject; // fatal error - объявление пространства имён должно быть первым выражением в скрипте
+// ?>
+?>
+
+<!-- https://www.php.net/manual/ru/language.namespaces.definition.php -->
 </body> 
 </html>

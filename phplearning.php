@@ -3,112 +3,31 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Ковариантность и контравариантность</title>
+	<title>Обзор пространств имён</title>
 </head>
 <body>
 
-<?php  //Ковариантность
-abstract class Animal
-{
-    protected string $name;
+<?php//Пример #1 Пример синтаксиса, использующего пространство имён
+namespace my\name;// смотрите раздел "Определение пространств имён"
+class MyClass{}
+function myfuncion(){}
+const MYCONST = 1;
 
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
+$a = new MyClass;
+$c = new \my\name\MyClass;// смотрите раздел "Глобальная область видимости"
 
-    abstract public function speak();
-}
+$a = strlen('hi');// смотрите раздел "Использование пространств имён: возврат
+                   // к глобальной функции/константе"
 
-class Dog extends Animal
-{
-    public function speak()
-    {
-        echo $this->name . " лает";
-    }
-}
+$d = namespace\MYCONST;// смотрите раздел "оператор пространства имён и
+                        // константа __NAMESPACE__"
 
-class Cat extends Animal
-{
-    public function speak()
-    {
-        echo $this->name . " мяукает";
-    }
-}
-?>
-<?php  
-interface AnimalShelter{
-    public function adopt (string $name): Animal;
-}
+$d = __NAMESPACE__ . '\MYCONST';
 
-class catShelter implements AnimalShelter{
-    public function adopt(string $name): Cat{// Возвращаем класс Cat вместо Animal
-        return new Cat($name);
-    }
-}
-
-class DogShelter implements AnimalShelter{
-    public function adopt(string $name): Dog{// Возвращаем класс Dog вместо Animal
-        return new Dog($name);
-    }
-}
-
-$kitty = (new CatShelter)->adopt("Рыжик");
-$kitty->speak();
-echo "\n";
-
-$doggy = (new DogShelter)->adopt("Бобик");
-$doggy->speak();
+echo constant($d);// смотрите раздел "Пространства имён и динамические особенности языка"
 ?>
 
 
-
-
-<?php  //Контравариантность
-
-
-class Food {}
-
-class AnimalFood extends Food {}
-
-abstract class Animal
-{
-    protected string $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
-
-    public function eat(AnimalFood $food)
-    {
-        echo $this->name . " ест " . get_class($food);
-    }
-}
-?>
-
-
-<?php
-
-class Dog extends Animal
-{
-    public function eat(Food $food) {
-        echo $this->name . " ест " . get_class($food);
-    }
-}
-?>
-
-<?php
-
-$kitty = (new CatShelter)->adopt("Рыжик");
-$catFood = new AnimalFood();
-$kitty->eat($catFood);
-echo "\n";
-
-$doggy = (new DogShelter)->adopt("Бобик");
-$banana = new Food();
-$doggy->eat($banana);?>
-
-<!-- https://www.php.net/manual/ru/language.oop5.variance.php -->
+<!-- https://www.php.net/manual/ru/language.namespaces.rationale.php -->
 </body> 
 </html>

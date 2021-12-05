@@ -4,64 +4,68 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Использование пространства имён: основы </title>
+	<title>Пространства имён и динамические особенности языка </title>
 </head>
 <body>
-<?php 
-namespace Foo\Bar\subnamespace;
 
-const Foo = 1;
-function foo(){}
- class foo {
-    static function staticmethod(){
-    }
- }
-?>
+    
+<?php  //Пример #1 Динамически доступные элементы
+class classneme{
+    function __construct()
+{
+    echo __METHOD__. ;
+}}
 
-<?php  
-namespace Foo\Bar;
-include 'file1.php';
-
-const FOO = 2;
-function foo(){}
-class foo{
-    static function staticmethod(){}
+function funcname(){
+    echo __FUNCTION__,
 }
 
-foo();
-foo::staticmethod();
-echo FOO;
+const cconstname = "global";
 
-subnamespace\foo();
-subnamespace\foo::staticmethod();
-
-echo subnamespace\FOO;
-\FOO\Bar\foo();
-\FOO\Bar\::staticmethod();
-echo \FOO\Baar\Foo;
+$a = 'classneme';
+$obj = new $a;
+$b = 'funcname';
+$b();
+echo constant('constant'),
 ?>
 
-
-<?php //Пример #1 Доступ к глобальным классам, функциям и константам из пространства имён 
-namespace Foo;
-
-function strlen(){}
-    const INI_ALL = 3;
-    class Exeption{
+<?php  //Пример #2 Динамически доступные элементы пространства имён
+namespace namespacename;
+class classname{
+    function __construct(){
+        echo __METHOD__,
     }
+}
 
-    $a = \strlen(){}
-    const INI_ALL = 3;
-    class Exeption{}
+function funcname(){
+    echo __FUNCTION__,
+}
 
-    $a = \strlen('hi');
-    $b = \INI_ALL;
-    $c = new\Exeption('error');
+const constname = "namespaced";
 
+include 'example1.php';
+
+$a = 'classname';
+$obj = new $a;
+$b = 'funcname';
+$b();
+echo constant('constname'),
+
+$a = '\namespacename\classname';
+$obj = new $a;
+$a = 'namespacename\classname';
+$obj = new $a;
+$b = 'namespacename\funcname';
+$b();
+$b = 'namespacename\funcname';
+$b();
+echo constant('\namespacename\constname');
+echo constant('namespacename\constname');
 ?>
 
 
 
-<!-- https://www.php.net/manual/ru/language.namespaces.basics.php -->
+<!-- https://www.php.net/manual/ru/language.namespaces.dynamic.php -->
+
 </body> 
 </html>

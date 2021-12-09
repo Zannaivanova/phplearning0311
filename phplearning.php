@@ -4,126 +4,189 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>FAQ: вещи, которые вам необходимо знать о пространствах имён </title>
+	<title>Перечисления </title>
 </head>
 <body>
 
-<?php  //Пример #1 Доступ к глобальным классам вне пространства имён
-$a = new \stdClass;
-?>
+ 
+<!-- Содержание 
 
-<?php  //Пример #2 Доступ к глобальным классам вне пространства имён
-$a = new stdClass;
-?>
+    Обзор перечислений
+    Основы перечислений
+    Типизированные перечисления
+    Методы перечислений
+    Статические методы перечислений
+    Константы перечислений
+    Трейты
+    Значения перечисления в постоянных выражениях
+    Отличия от объектов
+    Список значений
+    Сериализация
+    Примеры -->
 
-
-<?php  //Пример #3 Доступ ко внутренним классам в пространствах имён
-namespace foo;
-$a = new \stdClass;
-
-function test(\ArrayObject $parametr_type_example = null){}
-
-$a = \DirectoryIterator::CURRENT_AS_FILEINFO;
-
-class MyExeption extends \Exception {}
-?>
-
-
-<?php  //Пример #4 Доступ ко внутренним классам, функциям или константам в пространствах имён
-namespace foo;
-
-class MyClass {}
-
-function test (MyClass $parameter_type_example = null){}
-function test(\foo\MyClass $parameter_type_example = null){}
-
-class Extended extends MyClass {}
-
-$a = \globalfunc();
-
-$b = \INI_ALL;
-?>
-
-<?php  //Пример #5 Абсолютные имена
-namespace foo;
-$a = new \my\name();
-echo \strlen('hi');
-$a = \INI_ALL;
-?>
-
-
-<?php //Пример #6 Полные имена
-namespace foo;
-use blah\blah as foo;
-
-$a = new my\name();
-foo\bar::name();
-my\bar();
-$a = my\BAR;
- ?>
-
-
-<?php  //Пример #7 Неполные имена классов
-namespace foo;
-use blah\blah as foo;
-
-$a = new name();
-foo::name();
-?>
-
-
-<?php  //Пример #8 Неполные имена функций или констант
-namespace foo;
-use blah\blah as foo;
-
-const FOO = 1;
-
-function my( ){}
-function foo() {}
-function sort(&$a){
-	\sort($a);
-	$a = array_flip($a);
-	return $a;
+<?php  //1.Методы перечислений
+interface Colorful{
+	public function color():string;
 }
 
-my();
-$a = strlen('hi');
-$arr = array(1,2,3);
-$b = sort($arr);
-$c = foo();
+enum Suit implements Colorful {
+	case Hearts;
+	case Diamonds;
+	case Clubs;
+	case Spades;
 
-$a = FOO;
-$b = INI_ALL;
+	public function color(): string{
+		return match($this){
+			Suit::Hearts, Suit::Diamonds =>'Красный',
+			Suit::Clubs, Suit::Spades =>'Черный'
+		};
+	}
+
+	public function shape(): string{
+		return "Rectangle";
+	}
+}
+
+function paint(Colorful $c){ ... }
+
+paint(Suit::Clubs);
+
+print Suit::Diamonds->shape();
 ?>
 
 
-<?php  //Пример #9 Подводные камни при использовании имени пространства имён внутри строки с двойными кавычками
-$a = "dangerous\name";
-$obj = new $a;
+<?php //2.Методы перечислений
 
-$a = 'not\at\all\dangerous';
-$obj = new $a;
-?>
+interface Colorful{
+	public function color(): string;
+}
 
+enum Suit: string implements Colorful{
+	case Hearts = 'H';
+	case Diamonds = 'D';
+	case Clubs = 'C';
+	case Spades = 'S';
 
-
-<?php  //Пример #10 Неопределённые константы
-namespace bar;
-$a = FOO;
-$a = \FOO;
-$a = Bar\FOO;
-$a = \Bar\FOO;
-?>
-
-
-
-<?php //Пример #11 Неопределённые константы
-namespace bar;
-const NULL = 0;
-const true = 'stupid';
-
+	public function color(); string{
+		return function color():string{
+			return match($this){
+				Suit::Hearts, Suit::Diamonds =>'Красный',
+				Suit::Clubs, Suit::Spades =>'Черный'
+			} ;
+		}
+	}
  ?>
 
-<!-- https://www.php.net/manual/ru/language.namespaces.faq.php -->
+
+<?php   //3.Методы перечислений
+interface Colorful{
+	public function color(); string;
+}
+
+final class Suit implements UnitEnum, Colorful{
+	public const Hearts = new self('Hearts');
+	public const Diamonds = new self('Diamonds');
+	public const Clubs = new self('Clubs');
+	public const Spades = new self('Spades');
+
+	private function __construct(public readonly string $name){}
+
+	public function color(): string{
+		return match(this){
+			Suit::Hearts, Suit::Diamonds => 'Красный',
+			Suit::Clubs, Suit::Spades => 'Черный '
+		} ;
+	}
+
+	public function shape(); string{
+		return "Прямоугольник";
+	}
+
+	public static function cases():array{
+
+	}
+}
+
+?>
+
+
+<?php //Статические методы перечислений 
+enum Size{
+	case Small;
+	case Medium;
+	Case Large;
+
+	public static function fromLenght(int $cm): static{
+		return match(true){
+			$cm<50 => static::Small,
+			$cm<100 => static::Medium,
+			default =>static::Large,
+		};
+	}
+}
+ ?>
+
+
+<?php //Константы перечислений 
+enum Size{
+	case Small;
+	case Medium;
+	case Large;
+
+	public const Huge = self::Large;
+}
+ ?>
+
+ <?php  //Трейты 
+ interface Colorful{public function color(); string;}
+
+trait Rectangle{
+	public function shape(): string{
+		return "Прямоугольник";
+	}
+}
+
+enum Suit implements Colorful{
+	use Rectangle;
+
+    case Hearts;
+    case Diamonds;
+    case Clubs;
+    case Spades;
+
+    public function color(): string{
+    	return match($this){
+    		Suit::Hearts, Suit::Diamonds=>'Красный',
+    		Suit::Clubs, Suit::Spades => 'Черный'б
+    	} ;
+    }
+}
+ ?>
+
+
+ <?php  //Значения перечисления в постоянных выражениях 
+ enum Direction implements ArrayAccess{
+ 	case Up;
+ 	case Down;
+
+ 	public function offsetGet($val){...}
+ 	public function offsetExists($val){...}
+ 	public function offsetSet($val){ throw new Exception(); }
+ 	public function offsetUnset($val){ throw new Exception(); }
+
+ }
+
+ class Foo{
+ 	const Bar = Direction::Down;
+    const Bar = Direction::Up['short'];
+ }
+
+$x = Direction::Up['short'];
+ ?>
+
+
+
+
+<!-- https://www.php.net/manual/ru/language.enumerations.php -->
 </body> 
 </html>

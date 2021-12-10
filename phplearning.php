@@ -4,158 +4,139 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Исключения </title>
+	<title>Наследование исключений</title>
 </head>
 <body>
 
-<?php //Пример #3 Преобразование сообщения об ошибках в исключение
-function exeption_error_handler($severity, $message, $filename, $lineno){
-	throw new ErrorExeption($message, 0, $severity, $filename, $lineno);
+<?php//Пример #1 Встроенный класс Exception
+class Exception implements Throwable {
+	protected $message = 'Unknown exception';
+	private $string;
+	protected $code = 0;
+	protected $file;
+	protected $line;
+	private $trace;
+	private $previous;
+
+	public function __construct($message = '', $code = 0, Throwable $previous= null);
+
+	final private function __clone();
+
+	final public function getMessage();
+	final public function getCode();
+	final public function getFile();
+	final public function getLine();
+	final public function getTrace();
+	final public function getPrevious();
+	final public function getTraceAsString();
+
+	public function __toString();
+}  
+?>
+
+<?php  //Пример #2 Наследование класса Exception
+class MyException extends Exception{
+	public function __construct($message, $code = 0, Trowable $previous = null){
+		parent:: __construct($message, $code, $previous);
+	}
+
+	public function __toString(){
+		return __CLASS__ . ":[{$this->code}]:{$this->message}\n";
+	}
+
+	public function customFunction(){
+		echo "Мы можем определять новые методы в наследуемом классе\n ";
+	}
 }
-set_error_handler('exeption_error_handler');
- ?>
+
+class TestException{
+	public $var;
+
+	const THROW_NONE = 0;
+	const THROW_CUSTOM = 1;
+	const THROW_DEFAULT = 2;
+
+	function __construct ($avalue = self::THROW_NONE){
+
+	switch($avalue){
+		case self::THROW_CUSTOM:getTracethrow new MyException('1 -  неправильный параметр', 5);
+		break;
 
 
+		case self::THROW_DEFAULT:getTracethrowthrow nre Exception('2- недопустимый параметр', 6);
+		break;
 
-<?php  //Пример #4 Выбрасывание исключений
-function inverse($x) {
-    if (!$x) {
-        throw new Exception('Деление на ноль.');
+		default:getTracethrowthrow$this->var = $avalue;
+		break;
+	}
+ }
+}
+
+
+;
+                break;
+        }
     }
-    return 1/$x;
 }
 
+
+// Пример 1
 try {
-    echo inverse(5) . "\n";
-    echo inverse(0) . "\n";
-} catch (Exception $e) {
-    echo 'Выброшено исключение: ',  $e->getMessage(), "\n";
+	$o = new TestException(TestException::THROW_CUSTOM);
+} catch (MyException $e){
+	echo "Поймано собственное исклбчение\n";
+	$e->customFunction();
+}  catch (Exception $e){
+	echo "Поймано встроенное исключение\n", $e;
 }
 
-// Продолжение выполнения
-echo "Привет, мир\n";
-?>
+var_dump($o);
+echo "\n\n";
 
 
-<?php  //Пример #5 Обработка исключений с помощью блока finally
-function inverse($x) {
-    if (!$x) {
-        throw new Exception('Деление на ноль.');
-    }
-    return 1/$x;
-}
 
+// Пример 2
 try {
-    echo inverse(5) . "\n";
-} catch (Exception $e) {
-    echo 'Поймано исключение: ',  $e->getMessage(), "\n";
-} finally {
-    echo "Первый блок finally.\n";
-}
-
-try {
-    echo inverse(0) . "\n";
-} catch (Exception $e) {
-    echo 'Поймано исключение: ',  $e->getMessage(), "\n";
-} finally {
-    echo "Второй блок finally.\n";
-}
-
-// Продолжение нормального выполнения
-echo "Привет, мир\n";
-?>
-
-
-
-<?php  //Пример #6 Взаимодействие между блоками finally и return
-function test(){
-	try { 
-	  throw new Exception('foo');
-	}  catch (Exception $e) {
-		return 'catch';
-	}  finally{
-		return 'finally';
-	}
-}
-
-echo test();
-?>
-
-<?php  //Пример #7 Вложенные исключения
-class MyException extends Exception {}
-
-class Test {
-	public function testing(){
-		try {
-			try{
-				throw new MyException('foo!');
-			} catch (MyException $e){
-				throw $e;
-			}
-		} catch (Exception $e){
-			var_dump($e->getMessage());
-		}
-	}
-}
-
-$foo = new Test;
-$foo->testing();
-?>
-
-
-<?php  //Пример #8 Обработка нескольких исключений в одном блоке catch
-class MyException extends Exception {}
-
-class MyOtherException extends Exception {}
-
-class Test {
-	public function testing(){
-		try {
-			throw new MyException();
-		} catch (MyException | MyOtherException $e){
-			var_dump(get_class($e));
-		}
-	}
-}
-
-$foo = new Test;
-$foo->testing();
-?>
-
-
-<?php  //Пример #9 Пример блока catch без указания переменной
-class SpecificException extends Exception {}
-
-function test(){
-	throw new SpecificException('Ой!');
-}
-
-try {
-	test();
-} catch (SpecificException){
-	print " Было поймано исключение SpecificException, но нам безразлично, что у него внутри "
-}
-?>
-
-
-<?php  //Пример #10 Throw как выражение
-class SpecificException extends Exception {}
-
-function test(){
-	do_something_risky() or throw new Exeption('   Все сломалось');
-}
-
-try {
-	test();
+	$o = new TestException(TestException::THROW_DEFAULT);
+} catch (MyException $e){
+	echo "Поймано переопределенное исключение\n", $e;
+	$e->customFunction();
 } catch (Exception $e){
-	print $e->getMessage();
+	echo "Перехвачено встроенное исключение\n", $e;
 }
+
+var_dump($o);
+echo "\n\n";
+
+
+// Пример 3
+try {
+    $o = new TestException(TestException::THROW_CUSTOM);
+} catch (Exception $e) {        // Будет перехвачено
+    echo "Поймано встроенное исключение\n", $e;
+}
+
+// Продолжение исполнения программы
+var_dump($o); // Null
+echo "\n\n";
+
+
+// Пример 4
+try {
+    $o = new TestException();
+} catch (Exception $e) {        // Будет пропущено, т.к. исключение не выбрасывается
+    echo "Поймано встроенное исключение\n", $e;
+}
+
+// Продолжение выполнения программы
+var_dump($o); // TestException
+echo "\n\n";
+?>
 ?>
 
 
 
- 
-<!-- https://www.php.net/manual/ru/language.exceptions.php -->
+<!-- https://www.php.net/manual/ru/language.exceptions.extending.php -->
 </body> 
 </html>
 

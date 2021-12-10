@@ -4,69 +4,70 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Сравнение генераторов с объектами класса Iterator </title>
+	<title>Атрибуты</title>
 </head>
 <body>
 
-<?php 
-function getLinesFromFile($fileName){
-	if (!$fileHandle = fopen($fileName, 'r')){
-		return;
-	}
+<?php  //Пример #1 Реализация опциональных методов интерфейса с помощью атрибутов
 
-	while (false !==$line = fgets($fileHandle)){
-		yield $line;
-	}
-
-	fclose($fileHandle);
-}  
-
-class LineIterator implements Iterator{
-	protected $fileHandle;
-
-	protected $line;
-	protected $i;
-
-	public function __construct($fileName){
-		if (!$this->fileHandle = fopen($fileName, 'r')){
-			throw new RuntimeException('Невозможно открыть файл' . $fileName . '"');
-		}
-	}
-
-	public function rewind(){
-		fseek($this->fileHandle, 0);
-		$this->line = fget($this->fileHandle);
-		$this->i = 0;
-	}
-
-	public function valid(){
-		return false !==$this->line;
-	}
-
-	public function current(){
-		return $this->line;
-	}
-
-	public function key(){
-		return $this->i;
-	}
-
-	public function next(){
-		if (false !== $this->line){
-			$this->line = fgets($this->fileHandle);
-			$this->i++;
-		}
-	}
-
-	public function __destruct(){
-		fclose($this->fileHandle);
-	}
+interface ActionHandler{
+	public function execute();
 }
 
+#[Attribute]
+class Setup {}
+
+class CopyFile implements ActionHandler{
+	public string $fileName;
+	public string $targetDirectory;
+
+	#[Setup]
+    public function fileExists(){
+    	if (!file_exists($this->fileName)){
+    		throw new RuntimeException("File does not exist");
+    	}
+    }
+    
+    #[Setup]
+    public function tergetDirectoryExists(){
+    	if (!file_exists($this->targetDirectory)){
+    		mkdir($this->targetDirectory);
+    	} elseif (!is_dir($this->targetDirectory)){
+    		throw new RuntimeException("Target directory $this->targetDirectory is not a directory");
+    	}
+    }
+
+   public function execute(){
+   	copy($this->fileName, $this->targetDirectory . '/' . basename($this->fileName));
+   }
+}
+
+function executeAction(ActionHandler $actionHandler){
+	$reflection = new ReflectionObject($actionHandler);
+
+	foreach ($reflection->getMethods() as $method){
+		$attributes = $method->getAttributes(SetUp::class);
+
+		if (count ($attributes)> 0){
+			$methodName = $method->getName();
+
+			$actionHandler->$methodName();
+		}
+	}
+
+	$actionHandler->execute();
+}
+
+$copyAction = new CopyFile();
+$copyAction->fileName = "/tmp/foo.jpg";
+$copyAction->targetDirectory = "/home/user";
+
+executeAction($copyAction);
 ?>
 
 
-<!-- https://www.php.net/manual/ru/language.generators.comparison.php -->
+
+<!-- https://www.php.net/manual/ru/language.attributes.php -->
 </body> 
 </html>
 

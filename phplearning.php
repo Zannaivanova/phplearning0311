@@ -4,189 +4,185 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Перечисления </title>
+	<title>Исключения </title>
 </head>
 <body>
 
- 
-<!-- Содержание 
+<?php //Пример #3 Преобразование сообщения об ошибках в исключение
+function exeption_error_handler($severity, $message, $filename, $lineno){
+	throw new ErrorExeption($message, 0, $severity, $filename, $lineno);
+}
+set_error_handler('exeption_error_handler');
+ ?>
 
-    Обзор перечислений
-    Основы перечислений
-    Типизированные перечисления
-    Методы перечислений
-    Статические методы перечислений
-    Константы перечислений
-    Трейты
-    Значения перечисления в постоянных выражениях
-    Отличия от объектов
-    Список значений
-    Сериализация
-    Примеры -->
 
-<?php  //1.Методы перечислений
-interface Colorful{
-	public function color():string;
+
+<?php  //Пример #4 Выбрасывание исключений
+function inverse($x) {
+    if (!$x) {
+        throw new Exception('Деление на ноль.');
+    }
+    return 1/$x;
 }
 
-enum Suit implements Colorful {
-	case Hearts;
-	case Diamonds;
-	case Clubs;
-	case Spades;
-
-	public function color(): string{
-		return match($this){
-			Suit::Hearts, Suit::Diamonds =>'Красный',
-			Suit::Clubs, Suit::Spades =>'Черный'
-		};
-	}
-
-	public function shape(): string{
-		return "Rectangle";
-	}
+try {
+    echo inverse(5) . "\n";
+    echo inverse(0) . "\n";
+} catch (Exception $e) {
+    echo 'Выброшено исключение: ',  $e->getMessage(), "\n";
 }
 
-function paint(Colorful $c){ ... }
-
-paint(Suit::Clubs);
-
-print Suit::Diamonds->shape();
+// Продолжение выполнения
+echo "Привет, мир\n";
 ?>
 
 
-<?php //2.Методы перечислений
-
-interface Colorful{
-	public function color(): string;
+<?php  //Пример #5 Обработка исключений с помощью блока finally
+function inverse($x) {
+    if (!$x) {
+        throw new Exception('Деление на ноль.');
+    }
+    return 1/$x;
 }
 
-enum Suit: string implements Colorful{
-	case Hearts = 'H';
-	case Diamonds = 'D';
-	case Clubs = 'C';
-	case Spades = 'S';
+try {
+    echo inverse(5) . "\n";
+} catch (Exception $e) {
+    echo 'Поймано исключение: ',  $e->getMessage(), "\n";
+} finally {
+    echo "Первый блок finally.\n";
+}
 
-	public function color(); string{
-		return function color():string{
-			return match($this){
-				Suit::Hearts, Suit::Diamonds =>'Красный',
-				Suit::Clubs, Suit::Spades =>'Черный'
-			} ;
+try {
+    echo inverse(0) . "\n";
+} catch (Exception $e) {
+    echo 'Поймано исключение: ',  $e->getMessage(), "\n";
+} finally {
+    echo "Второй блок finally.\n";
+}
+
+// Продолжение нормального выполнения
+echo "Привет, мир\n";
+?>
+
+
+
+<?php  //Пример #6 Взаимодействие между блоками finally и return
+function test(){
+	try { 
+	  throw new Exception('foo');
+	}  catch (Exception $e) {
+		return 'catch';
+	}  finally{
+		return 'finally';
+	}
+}
+
+echo test();
+?>
+
+<?php  //Пример #7 Вложенные исключения
+class MyException extends Exception {}
+
+class Test {
+	public function testing(){
+		try {
+			try{
+				throw new MyException('foo!');
+			} catch (MyException $e){
+				throw $e;
+			}
+		} catch (Exception $e){
+			var_dump($e->getMessage());
 		}
 	}
- ?>
-
-
-<?php   //3.Методы перечислений
-interface Colorful{
-	public function color(); string;
 }
 
-final class Suit implements UnitEnum, Colorful{
-	public const Hearts = new self('Hearts');
-	public const Diamonds = new self('Diamonds');
-	public const Clubs = new self('Clubs');
-	public const Spades = new self('Spades');
-
-	private function __construct(public readonly string $name){}
-
-	public function color(): string{
-		return match(this){
-			Suit::Hearts, Suit::Diamonds => 'Красный',
-			Suit::Clubs, Suit::Spades => 'Черный '
-		} ;
-	}
-
-	public function shape(); string{
-		return "Прямоугольник";
-	}
-
-	public static function cases():array{
-
-	}
-}
-
+$foo = new Test;
+$foo->testing();
 ?>
 
 
-<?php //Статические методы перечислений 
-enum Size{
-	case Small;
-	case Medium;
-	Case Large;
+<?php  //Пример #8 Обработка нескольких исключений в одном блоке catch
+class MyException extends Exception {}
 
-	public static function fromLenght(int $cm): static{
-		return match(true){
-			$cm<50 => static::Small,
-			$cm<100 => static::Medium,
-			default =>static::Large,
-		};
-	}
-}
- ?>
+class MyOtherException extends Exception {}
 
-
-<?php //Константы перечислений 
-enum Size{
-	case Small;
-	case Medium;
-	case Large;
-
-	public const Huge = self::Large;
-}
- ?>
-
- <?php  //Трейты 
- interface Colorful{public function color(); string;}
-
-trait Rectangle{
-	public function shape(): string{
-		return "Прямоугольник";
+class Test {
+	public function testing(){
+		try {
+			throw new MyException();
+		} catch (MyException | MyOtherException $e){
+			var_dump(get_class($e));
+		}
 	}
 }
 
-enum Suit implements Colorful{
-	use Rectangle;
+$foo = new Test;
+$foo->testing();
+?>
 
-    case Hearts;
-    case Diamonds;
-    case Clubs;
-    case Spades;
 
-    public function color(): string{
-    	return match($this){
-    		Suit::Hearts, Suit::Diamonds=>'Красный',
-    		Suit::Clubs, Suit::Spades => 'Черный'б
-    	} ;
-    }
+<?php  //Пример #9 Пример блока catch без указания переменной
+class SpecificException extends Exception {}
+
+function test(){
+	throw new SpecificException('Ой!');
 }
- ?>
+
+try {
+	test();
+} catch (SpecificException){
+	print " Было поймано исключение SpecificException, но нам безразлично, что у него внутри "
+}
+?>
 
 
- <?php  //Значения перечисления в постоянных выражениях 
- enum Direction implements ArrayAccess{
- 	case Up;
- 	case Down;
+<?php  //Пример #10 Throw как выражение
+class SpecificException extends Exception {}
 
- 	public function offsetGet($val){...}
- 	public function offsetExists($val){...}
- 	public function offsetSet($val){ throw new Exception(); }
- 	public function offsetUnset($val){ throw new Exception(); }
+function test(){
+	do_something_risky() or throw new Exeption('   Все сломалось');
+}
 
- }
-
- class Foo{
- 	const Bar = Direction::Down;
-    const Bar = Direction::Up['short'];
- }
-
-$x = Direction::Up['short'];
- ?>
+try {
+	test();
+} catch (Exception $e){
+	print $e->getMessage();
+}
+?>
 
 
 
-
-<!-- https://www.php.net/manual/ru/language.enumerations.php -->
+ 
+<!-- https://www.php.net/manual/ru/language.exceptions.php -->
 </body> 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

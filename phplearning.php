@@ -4,70 +4,52 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Атрибуты</title>
+	<title>Синтаксис атрибутов</title>
 </head>
 <body>
 
-<?php  //Пример #1 Реализация опциональных методов интерфейса с помощью атрибутов
+<?php//Пример #1 Синтаксис атрибутов
 
-interface ActionHandler{
-	public function execute();
-}
+//a.php
+namespace MyExample;
+
+use Attribute;
 
 #[Attribute]
-class Setup {}
+class MyAttribute{
+	const VALUE = 'value';
 
-class CopyFile implements ActionHandler{
-	public string $fileName;
-	public string $targetDirectory;
+	private $value;
 
-	#[Setup]
-    public function fileExists(){
-    	if (!file_exists($this->fileName)){
-    		throw new RuntimeException("File does not exist");
-    	}
-    }
-    
-    #[Setup]
-    public function tergetDirectoryExists(){
-    	if (!file_exists($this->targetDirectory)){
-    		mkdir($this->targetDirectory);
-    	} elseif (!is_dir($this->targetDirectory)){
-    		throw new RuntimeException("Target directory $this->targetDirectory is not a directory");
-    	}
-    }
-
-   public function execute(){
-   	copy($this->fileName, $this->targetDirectory . '/' . basename($this->fileName));
-   }
-}
-
-function executeAction(ActionHandler $actionHandler){
-	$reflection = new ReflectionObject($actionHandler);
-
-	foreach ($reflection->getMethods() as $method){
-		$attributes = $method->getAttributes(SetUp::class);
-
-		if (count ($attributes)> 0){
-			$methodName = $method->getName();
-
-			$actionHandler->$methodName();
-		}
+	public function __construct($value = null){
+		$this->value = $value;
 	}
+}  
 
-	$actionHandler->execute();
+//b.php
+namespace Another;
+
+use MyExample\MyAttribute;
+
+#[MyAttribute]
+#[\MyExample\MyAttribute]
+#[MyAttribute(1234)]
+#[MyAttribute(value: 1234)]
+#[MyAttribute(MyAttribute::VALUE)]
+#[MyAttribute(array("key"=>"value"))]
+#[MyAttribute(100+200)]
+class Thing{
+
 }
 
-$copyAction = new CopyFile();
-$copyAction->fileName = "/tmp/foo.jpg";
-$copyAction->targetDirectory = "/home/user";
+#[MyAttribute(1234), MyAttribute(5678)]
+class AnotherThing{
+	
+}
 
-executeAction($copyAction);
 ?>
 
-
-
-<!-- https://www.php.net/manual/ru/language.attributes.php -->
+<!-- https://www.php.net/manual/ru/language.attributes.syntax.php -->
 </body> 
 </html>
 

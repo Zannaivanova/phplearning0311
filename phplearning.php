@@ -4,49 +4,63 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Синтаксис атрибутов</title>
+	<title>Чтение атрибутов с помощью Reflection API</title>
 </head>
 <body>
 
-<?php//Пример #1 Синтаксис атрибутов
-
-//a.php
-namespace MyExample;
-
-use Attribute;
-
+<?php //Пример #1 Чтение атрибутов с помощью Reflection API
 #[Attribute]
-class MyAttribute{
-	const VALUE = 'value';
 
-	private $value;
+class NMyAttribute{
+  public $value;
 
-	public function __construct($value = null){
-		$this->value = $value;
+  public function __construct($value){
+  	$this->value = $value;
+  }
+}
+
+#[MyAttribute(value:1234)]
+class thing{
+}
+
+function dumpAttributeData($reflection){
+	$attributes = $reflection->getAttributes();
+
+	foreach ($attributes as $attribute){
+		var_dump($attribute->getName());
+		var_dump($attribute->getArguments());
+		var_dump($attribute->newIstance());
 	}
-}  
-
-//b.php
-namespace Another;
-
-use MyExample\MyAttribute;
-
-#[MyAttribute]
-#[\MyExample\MyAttribute]
-#[MyAttribute(1234)]
-#[MyAttribute(value: 1234)]
-#[MyAttribute(MyAttribute::VALUE)]
-#[MyAttribute(array("key"=>"value"))]
-#[MyAttribute(100+200)]
-class Thing{
-
 }
 
-#[MyAttribute(1234), MyAttribute(5678)]
-class AnotherThing{
-	
+
+dumAttributeDatas(new ReflectionClass(Thing::class));
+/*
+string(11) "MyAttribute"
+array(1) {
+  ["value"]=>
+  int(1234)
+}
+object(MyAttribute)#3 (1) {
+  ["value"]=>
+  int(1234)
+}
+*/
+ ?>
+
+
+<?php  //Пример #2 Чтение конкретных атрибутов с помощью Reflection API
+function dumpMyAttributeData($reflection){
+	$attributes = $reflection->getAttributes(MyAttribute::class);
+
+	foreach ($attributes as $attribute){
+		var_dump($attribute->getName());
+		var_dump($attribute->getArguments());
+		var_dump($attribute->newIstance());
+	}
 }
 
+dumpMyAttributeData(new ReflectionClass(Thing::class));
 ?>
 
 <!-- https://www.php.net/manual/ru/language.attributes.syntax.php -->

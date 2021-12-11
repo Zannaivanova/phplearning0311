@@ -4,66 +4,54 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Чтение атрибутов с помощью Reflection API</title>
+	<title>Объявление классов атрибутов</title>
 </head>
 <body>
 
-<?php //Пример #1 Чтение атрибутов с помощью Reflection API
+<?php  //Пример #1 Простой класс с атрибутом
+namespace Example;
+
+use Attribute;
+
 #[Attribute]
 
-class NMyAttribute{
-  public $value;
+class MyAttribute
+{
 
-  public function __construct($value){
-  	$this->value = $value;
-  }
 }
-
-#[MyAttribute(value:1234)]
-class thing{
-}
-
-function dumpAttributeData($reflection){
-	$attributes = $reflection->getAttributes();
-
-	foreach ($attributes as $attribute){
-		var_dump($attribute->getName());
-		var_dump($attribute->getArguments());
-		var_dump($attribute->newIstance());
-	}
-}
-
-
-dumAttributeDatas(new ReflectionClass(Thing::class));
-/*
-string(11) "MyAttribute"
-array(1) {
-  ["value"]=>
-  int(1234)
-}
-object(MyAttribute)#3 (1) {
-  ["value"]=>
-  int(1234)
-}
-*/
- ?>
-
-
-<?php  //Пример #2 Чтение конкретных атрибутов с помощью Reflection API
-function dumpMyAttributeData($reflection){
-	$attributes = $reflection->getAttributes(MyAttribute::class);
-
-	foreach ($attributes as $attribute){
-		var_dump($attribute->getName());
-		var_dump($attribute->getArguments());
-		var_dump($attribute->newIstance());
-	}
-}
-
-dumpMyAttributeData(new ReflectionClass(Thing::class));
 ?>
 
-<!-- https://www.php.net/manual/ru/language.attributes.syntax.php -->
+
+<?php  //Пример #2 Ограничение допустимых целей для использования атрибута
+namespace Example;
+
+use Attribute;
+
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
+class MyAttribute
+{
+
+}
+?>
+
+
+<?php  //Пример #3 Использование IS_REPEATABLE для разрешения использовать атрибут в объявлении несколько раз
+namespace Example;
+
+use Attribute;
+
+#[Attribute(Attribute::TARGET_METHOD| Attribute::TARGET_FUNCTION| Attribute::IS_REPEATABLE)]
+
+class MyAttribute
+{
+
+}
+
+?>
+
+
+
+<!-- https://www.php.net/manual/ru/language.attributes.classes.php -->
 </body> 
 </html>
 

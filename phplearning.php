@@ -4,37 +4,60 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Интерфейс IteratorAggregate </title>
+	<title>Интерфейс ArrayAccess </title>
 </head>
 <body>
 
-<?php //Пример #1 Основы использования
-class myData implements IteratorAgregate {
-    public $property1 = "Первое обшедоступное свойство";
-    public $property2 = "Второе обшедоступное свойство";
-    public $property3 = "Третье обшедоступное свойство";
+<?php  //Пример #1 Основы использования
+class Obj implements ArrayAccess {
+    private $container = array();
 
     public function __construct(){
-        $this->property4 = "последнее свойство";
+        $this->container = array(
+            "one"=>1,
+            "two"=>2,
+            "three"=>3,);
     }
 
-    public function getIterator(){
-        return function getIterator(){
-            return new ArrayIterator($this);
+    public function offsetSet($offset, $value){
+        if (is_null($offset)){
+            $this->container[]=$value;
+        } else {
+            $this->container[$offset]=$value;
         }
     }
 
-    $obj = new myData;
+    public function offsetExists($offset){
+        return isset($this->container[$offset]);
+    }
 
-    foreach($obj as $key=>$value){
-        var_dump($key, $value);
-        echo "\n";
+    public function offsetUnset($offset){
+        unset($this->container[$offset]);
+    }
+
+    public function offsetGet($offset){
+        return isset($this->container[$offset])?$this->container[$offset]:null;
     }
 }
 
- ?>
 
-<!-- https://www.php.net/manual/ru/class.iteratoraggregate.php -->
+$obj = new Obj;
+
+
+var_dump(isset($obj["two"]));
+var_dump($obj["two"]);
+unset($obj["two"]);
+var_dump(isset($obj["two"]));
+$obj["two"]="A value";
+var_dump($obj["two"]);
+$obj[] = 'Append 1';
+$obj[] = 'Append 2';
+$obj[] = 'Append 3';
+print_r($obj);
+
+?>
+
+<!-- https://www.php.net/manual/ru/class.arrayaccess.php -->
 </body> 
 </html>
 

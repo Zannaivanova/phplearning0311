@@ -4,60 +4,39 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Интерфейс ArrayAccess </title>
+	<title>Интерфейс Serializable</title>
 </head>
 <body>
 
 <?php  //Пример #1 Основы использования
-class Obj implements ArrayAccess {
-    private $container = array();
-
+class obj implements Serializable {
+    private $data;
     public function __construct(){
-        $this->container = array(
-            "one"=>1,
-            "two"=>2,
-            "three"=>3,);
+        $this->data = "Мои закрытые данные";
     }
-
-    public function offsetSet($offset, $value){
-        if (is_null($offset)){
-            $this->container[]=$value;
-        } else {
-            $this->container[$offset]=$value;
-        }
+    public function serialize(){
+        return serialize($this->data);
     }
-
-    public function offsetExists($offset){
-        return isset($this->container[$offset]);
+    public function unserialize($data){
+        $this->data = unserialize($data);
     }
-
-    public function offsetUnset($offset){
-        unset($this->container[$offset]);
-    }
-
-    public function offsetGet($offset){
-        return isset($this->container[$offset])?$this->container[$offset]:null;
+    public function getData(){
+        return $this->data;
     }
 }
 
+$obj = new obj;
+$ser = serialize($obj);
 
-$obj = new Obj;
+var_dump($ser);
 
+$newobj = unserialize($ser);
 
-var_dump(isset($obj["two"]));
-var_dump($obj["two"]);
-unset($obj["two"]);
-var_dump(isset($obj["two"]));
-$obj["two"]="A value";
-var_dump($obj["two"]);
-$obj[] = 'Append 1';
-$obj[] = 'Append 2';
-$obj[] = 'Append 3';
-print_r($obj);
+var_dump($newobj->getData());
 
 ?>
 
-<!-- https://www.php.net/manual/ru/class.arrayaccess.php -->
+<!-- https://www.php.net/manual/ru/class.serializable.php -->
 </body> 
 </html>
 

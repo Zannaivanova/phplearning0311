@@ -4,41 +4,48 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Интерфейс Stringable</title>
+	<title>Контекстные опции сокета</title>
 </head>
 <body>
 
-<?php //Пример #1 Простой пример использования Stringable
-class IPv4Address implements stringable {
-	private string $oct1;
-	private string $oct2;
-	private string $oct3;
-	private string $oct4;
+<?php //Пример #1 Пример использования bindto
 
-	public function __construct(string $oct1, string $oct2, string $oct3, string $oct4){
-		$this->oct1 = $oct1;
-		$this->oct2 = $oct2;
-		$this->oct3 = $oct3;
-		$this->oct4 = $oct4;
-	}
+// Соединение с сетью, используя IP '192.168.0.100'
+$opts = array(
+'socket' =>array(
+'bindto' =>'192.168.0.100:0',
+),
+);
 
-	public function __toString(): string {
-		return "$this->oct1.$this->oct2.$this->oct3.$this->oct4";
-	}
-}
+// Соединение с сетью, используя IP '192.168.0.100' и порт '7000'
+$opts = array(
+'socket'=>array('bindto'=>'192.168.0.100:7000',
+),);
 
-function showStuff(string|Stringable $value){
-	print $value;
-}
 
-$ip = new IPv4Address('123','234', '42', '9');
+// Соединение с сетью, используя IPv6 адрес '2001:db8::1'
+// и порт '7000'
+$opts = array(
+'socket'=>array(
+'bindto'=>'[2001:db8::1]:7000',),);
 
-showStuff($ip);
+
+// Соединение с сетью через порт '7000'
+$opts = array(
+'socket'=>array(
+'bindto'=>'0:7000',),);
+
+// Создаём контекст...
+$context = stream_context_create($opts);
+
+
+// ...и используем его для получения данных
+echo file_get_contents('http://www.example.com', false, $context);
+
 
  ?>
 
-<!-- https://www.php.net/manual/ru/class.stringable.php -->
-
+<!-- https://www.php.net/manual/ru/context.socket.php -->
 </body> 
 </html>
 

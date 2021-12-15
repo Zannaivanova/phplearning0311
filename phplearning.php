@@ -4,48 +4,46 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Контекстные опции сокета</title>
+	<title>Опции контекста HTTP</title>
 </head>
 <body>
 
-<?php //Пример #1 Пример использования bindto
+<?php //Пример #1 Извлечь страницу и отправить данные методом POST
+$postdata = http_build_query(
+array(
+'var1'=>'некоторое содержимое';
+'var2'=>'doh'
+));
 
-// Соединение с сетью, используя IP '192.168.0.100'
-$opts = array(
-'socket' =>array(
-'bindto' =>'192.168.0.100:0',
-),
-);
+$opts = array('http'=>
+array(
+'method' =>'POST',
+'header' => 'Content-type: application/x-www-form-urlencoded',
+'content' =>$posdata));
 
-// Соединение с сетью, используя IP '192.168.0.100' и порт '7000'
-$opts = array(
-'socket'=>array('bindto'=>'192.168.0.100:7000',
-),);
-
-
-// Соединение с сетью, используя IPv6 адрес '2001:db8::1'
-// и порт '7000'
-$opts = array(
-'socket'=>array(
-'bindto'=>'[2001:db8::1]:7000',),);
-
-
-// Соединение с сетью через порт '7000'
-$opts = array(
-'socket'=>array(
-'bindto'=>'0:7000',),);
-
-// Создаём контекст...
 $context = stream_context_create($opts);
 
-
-// ...и используем его для получения данных
-echo file_get_contents('http://www.example.com', false, $context);
-
-
+$result = file_get_contents('http://example.com/submit.php', false, $context);
  ?>
 
-<!-- https://www.php.net/manual/ru/context.socket.php -->
+<?php //Пример #2 Игнорировать переадресации, но извлечь заголовки и содержимое
+$url = "http://www.example.org/header.php";
+
+$opts = array('http'=>
+array(
+'method'=>'GET',
+'max_redirects' => '0',
+'ignore_errors' =>'1'));
+
+$context = stream_context_create($opts);
+$stream = fopen($url, 'r', false, $context);
+
+var_dump(stream_get_meta_data($stream));
+fclose($stream);
+ ?>
+
+<!-- https://www.php.net/manual/ru/context.http.php -->
+
 </body> 
 </html>
 

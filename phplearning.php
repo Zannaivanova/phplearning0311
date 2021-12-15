@@ -4,31 +4,41 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Класс WeakMap</title>
+	<title>Интерфейс Stringable</title>
 </head>
 <body>
 
-<?php//Пример #1 Пример использования Weakmap
-$wm = new WeakMap();
+<?php //Пример #1 Простой пример использования Stringable
+class IPv4Address implements stringable {
+	private string $oct1;
+	private string $oct2;
+	private string $oct3;
+	private string $oct4;
 
-$o = new StdClass;
+	public function __construct(string $oct1, string $oct2, string $oct3, string $oct4){
+		$this->oct1 = $oct1;
+		$this->oct2 = $oct2;
+		$this->oct3 = $oct3;
+		$this->oct4 = $oct4;
+	}
 
-class A {
-    public function __destruct() {
-        echo "Уничтожено!\n";
-    }
+	public function __toString(): string {
+		return "$this->oct1.$this->oct2.$this->oct3.$this->oct4";
+	}
 }
 
-$wm[$o] = new A;
+function showStuff(string|Stringable $value){
+	print $value;
+}
 
-var_dump(count($wm));
-echo "Сброс...\n";
-unset($o);
-echo "Готово\n";
-var_dump(count($wm)); 
-?>
+$ip = new IPv4Address('123','234', '42', '9');
 
-<!-- https://www.php.net/manual/ru/class.weakmap.php -->
+showStuff($ip);
+
+ ?>
+
+<!-- https://www.php.net/manual/ru/class.stringable.php -->
+
 </body> 
 </html>
 

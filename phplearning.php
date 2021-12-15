@@ -4,30 +4,22 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Опции контекста CURL</title>
+	<title>Опции контекста Zip</title>
 </head>
 <body>
 
-<?php //Пример #1 Получает страницу и посылает POST-запрос
-$postdata = http_build_query(
-array(
-'var1'=>'некоторое содержание',
-));
-
-$opts = array = array('http'=>
-	array(
-		'method'=>'POST',
-		'header'=>'Content-type: application/x-www-form-urlencoded',
-	    'content'=>$postdata)
-);
+<?php //Пример #1 Простой пример использования password
+$opts = array(
+'zip'=>array(
+'password'=>'secret',),);
 
 $context = stream_context_create($opts);
 
-$result = file_get_contents('http://example.com/submit.php', false, $context);
+echo file_get_contents('zip://test.zip#test.txt', false, $context);
 
  ?>
 
-<!-- https://www.php.net/manual/ru/context.curl.php -->
+<!-- https://www.php.net/manual/ru/context.zip.php -->
 </body> 
 </html>
 

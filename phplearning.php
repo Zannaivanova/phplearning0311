@@ -4,132 +4,108 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Поддерживаемые протоколы и обёртки</title>
+	<title>Безопасность. Сессии. Класс SessionHandler</title>
 </head>
 <body>
 
-<?php//Пример #1 Определение URL, с которого был забран документ после переадресаций
-$url = 'http://www.example.com/redirecting_page.php';
+<?php//Пример #1 Использование SessionHandler для того, чтобы добавить шифровку данных ко внутреннему обработчику сессий PHP. 
+/**
+  * расшифровать данные, используя алгоритм AES 256
+  *
+  * @param data $edata
+  * @param string $password
+  * @return расшифрованные данные
+  */
+function decrypt($edata, $password) {
+    $data = base64_decode($edata);
+    $salt = substr($data, 0, 16);
+    $ct = substr($data, 16);
 
-$fp = fopen($url, 'r');
+    $rounds = 3; // зависит от длины ключа
+    $data00 = $password.$salt;
+    $hash = array();
+    $hash[0] = hash('sha256', $data00, true);
+    $result = $hash[0];
+    for ($i = 1; $i < $rounds; $i++) {
+        $hash[$i] = hash('sha256', $hash[$i - 1].$data00, true);
+        $result .= $hash[$i];
+    }
+    $key = substr($result, 0, 32);
+    $iv  = substr($result, 32,16);
 
-$meta_data = streaming_get_meta_data($fp);
-foreach ($meta_data['wrapper_data'] as $response){
-	    /* Были ли мы переадресованы? */
-	if (strtolower(substr($response, 0, 10))=='location: '){
-		        /* Сохранить в $url адрес, куда нас переадресовали */
-		$url = substr($response, 10);
-	}
-} 
- ?>
+    return openssl_decrypt($ct, 'AES-256-CBC', $key, true, $iv);
+  }
 
+/**
+ * зашифровать данные алгоритмом AES 256
+ *
+ * @param data $data
+ * @param string $password
+ * @return base64 зашифрованные данные
+ */
+function encrypt($data, $password) {
+    // Установить случайную соль
+    $salt = openssl_random_pseudo_bytes(16);
 
- <?php //php:// Пример #1 php://temp/maxmemory
+    $salted = '';
+    $dx = '';
+    // Ключ соли (32) и вектор инициализации (16) = 48
+    while (strlen($salted) < 48) {
+      $dx = hash('sha256', $dx.$password.$salt, true);
+      $salted .= $dx;
+    }
 
- $fiveMBs = 5*1024*1024;
- $fp=fopen('php://temp/maxmemory:$fiveMBs','r+');
+    $key = substr($salted, 0, 32);
+    $iv  = substr($salted, 32,16);
 
- fputs($fp, "hello\n");
-
- rewind($fp);
-
- echo stream_get_contents($fp);
-  ?>
-
-
-<?php //Пример #2 php://filter/resource=<поток для фильтрации>
-/* Это просто эквивалентно:
-  readfile("http://www.example.com");
-  так как на самом деле фильтры не указаны */
-
-readfile("php://filter/resource=http://www.example.com");
-?>
-
-<?php //Пример #3 php://filter/read=<список фильтров для применения к цепочке чтения>
-/* Этот скрипт выведет содержимое
-  www.example.com полностью в верхнем регистре */
-readfile("php://filter/read=string.toupper/resource=http://www.example.com");
-/* Этот скрипт делает тоже самое, что вверхний, но
-  будет также кодировать алгоритмом ROT13 */
-readfile("php://filter/read=string.toupper|string.rot13/resource=http://www.example.com")
-
- ?>
-
-<?php//Пример #4 php://filter/write=<список фильтров для применения к цепочке записи>
-file_put_contents("php://filter/write=string.rot13/resource=example.txt", "Hello World"); 
- ?>
-
- <?php  //Пример #5 php://memory и php://temp нельзя переиспользовать
- file_put_contents('php://memory', 'PHP');
-echo file_get_contents('php://memory'); // ничего не напечатает
- ?>
-
-
-<?php //Пример #1 Вывод содержимого data://
-echo file_get_contents('data://text/plain;base64,SSBsb3ZlIFBIUAo=');
- ?>
-
-
-<?php //Пример #2 Получение типа потока
-$fp = fopen('data://text/plain;base64,', 'r');
-$meta = stream_get_meta_data($fp);
-echo $meta['mediatype'];
- ?>
-
- <?php //glob://
- $it = new DirectoryIterator("glob://ext/spl/examples/*.php");
- foreach($it as $f){
- 	print("%s: %.1FK\n", $f->getFilename(), $f->getSize()/1024);
- }
-
-  ?>
-
-
-  <?php //Пример #1 Открытие потока из активного соединения
-  $session = ssh2_connect('example.com', 22);
-  ssh2_auth_pubkey_file($session, 'username', '/home/username/.ssh/id_rsa.pub',
-                                               '/home/username/.ssh/id_rsa', 'secret');
-$connection_string = "ssh2.sftp://$session/";
-unset($session);
-$stream = fopen($connection_string . "path/to/file", 'r');
-   ?>
-
-
-
-   <?php//Пример #1 Обход RAR-архива
-   class MyRecDirIt extends RecursiveDirecoryIterator{
-   	fuction current(){
-   		return rawurldecode($this->getSubPathName()) .
-   		(is_dir(parent::current())?"[DIR]":"");
-   	}
-   } 
-$f = "rar://" . rawurlencode(dirname(__FILE__)) .
-DIRECTORY_SEPARATOR . 'dirs_and_extra_header.rar#';
-
-$it = new RecursiveTreeIterator(new MyRecDirIt($f));
-
-foreach ($it as $s){
-	echo $s, "\n";
+    $encrypted_data = openssl_encrypt($data, 'AES-256-CBC', $key, true, $iv);
+    return base64_encode($salt . $encrypted_data);
 }
-    ?>
+
+class EncryptedSessionHandler extends SessionHandler
+{
+    private $key;
+
+    public function __construct($key)
+    {
+        $this->key = $key;
+    }
+
+    public function read($id)
+    {
+        $data = parent::read($id);
+
+        if (!$data) {
+            return "";
+        } else {
+            return decrypt($data, $this->key);
+        }
+    }
+
+    public function write($id, $data)
+    {
+        $data = encrypt($data, $this->key);
+
+        return parent::write($id, $data);
+    }
+}
+
+// Здесь мы перехватываем встроенный обработчик 'files', но можно использовать любой другой
+// обработчик, например 'sqlite', 'memcache' или 'memcached',
+// которые предоставлены модулями PHP.
+ini_set('session.save_handler', 'files');
+
+$key = 'secret_string';
+$handler = new EncryptedSessionHandler($key);
+session_set_save_handler($handler, true);
+session_start();
+
+// устанавливаем и получаем значения из $_SESSION
+  ?>
 
 
-<?php //Пример #2 Открытие зашифрованного файла (шифрование заголовка)
-$stream = fopen("rar://".
-rawurlencode(dirname(__FILE__)). DIRECTORY_SEPARATOR .
-'encrypted_headers.rar'. '#encfile1.txt', "r", false,
-stream_context_create(
-array(
-'rar'=>
-array('open_password'=>'samplepassword'))));
-var_dump(stream_get_contents($stream));
 
-var_dump(fstat($stream));
-
- ?>
-
-
-<!-- https://www.php.net/manual/ru/wrappers.php -->
+<!-- https://www.php.net/manual/ru/class.sessionhandler.php -->
 </body> 
 </html>
 

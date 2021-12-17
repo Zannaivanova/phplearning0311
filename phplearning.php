@@ -4,24 +4,39 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Поддержка метода PUT</title>
+	<title>Работа с удалёнными файлами ¶</title>
 </head>
 <body>
 
-<?php //Пример #1 Сохранение файлов, отправленных через HTTP PUT
-$putdata = fopen("php://input", "r");
+<?php //Пример #1 Получение заголовка удалённой страницы
+$file = fopen("http://www.example.com/", "r");
+if (!$file){
+	echo "<p>Не возможно открыть даленный файл";
+	exit;
+}
 
-$fp = fopen("myputfile.ext", "w");
-
-while ($data = fread($putdata, 1024))
-fwrite($fp, $data);
-
-fclose($fp);
-fclose($putdata);
-
+while (!feof ($file)){
+	$line = fgets($file, 1024);
+	if (preg_match("@\<title\>(.*)\</title\>@i", $line, $out)){
+		$title = $out[1];
+		break;
+	}
+}
+fclose($file);
  ?>
 
-<!-- https://www.php.net/manual/ru/features.file-upload.put-method.php -->
+
+<?php//Пример #2 Сохранение данных на удалённом сервере
+$file = fopen("ftp://ftp.example.com/incoming/outputfile", "w");
+if(!$file){
+	echo "Неbозможно перезаписать удаленный файл";
+	exit;
+} 
+fwrite($file, $_SERVER['HTTP_USER_AGENT'].);
+fclose($file);
+
+ ?>
+<!-- https://www.php.net/manual/ru/features.remote-files.php -->
 </body> 
 </html>
 

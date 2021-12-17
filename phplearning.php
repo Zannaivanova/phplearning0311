@@ -4,91 +4,60 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Безопасность файловой системы</title>
+	<title>SQL-инъекции</title>
 </head>
 <body>
 
-<?php //Пример #1 Недостаточная проверка внешних данных ведёт к...
-$username = $_POST['user_submitted_name'];
-$userlife = $_POST['user_submited_filename'];
-$homedir = "/home/$username";
-
-unlink("$homedir/$userfile");
-
-echo "Файл был удален";
+<?php //Пример #1 Постраничный вывод результата... и создание суперпользователя в PostgreSQL 
+$offset = $argv[0];
+$query = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
+$result = pg_query($conn, $query);
  ?>
-	
-<?php //Пример #2 ... атаке на файловую систему
-$username = $_POST['user_submitted_name'];
-$userfile = $_POST['user_submitted_filename'];
-$homedir = "/home/$username";
 
-unlink("$homedir/$userfile");
 
-echo "Файл был удален" 
+<?php //Пример #2 Листинг статей... и некоторых паролей (для любой базы данных) 
+$query = "SELECT id, name, inserted, size FROM products WHERE size = '#size'
+";
+$result = odbc_exec($conn, $query);
+ ?>
+
+
+<?php //Пример #3 От восстановления пароля... до получения дополнительных привилегий (для любой базы данных) 
+$query = "UPDATE usertable SET pwd='$pwd' WHERE uid='$uid';";
+ ?>
+
+
+ <?php 
+
+// $uid: ' or uid like '%admin%
+$query="UPDATE usertable SET pwd='...' WHERE uid='' or uid like '%admin%';";
+
+// $pwd: hehehe', trusted=100, admin='yes
+$query = "UPDATE usertable SET pwd='hehehe', trusted=100, admin='yes' WHERE ...;";
+  ?>
+
+
+
+<?php  //Пример #4 Выполнение команд операционной системы на сервере (для базы MSSQL)
+$query = "SELECT * FROM products WHERE id LIKE '%$prod%'";
+$result = mssql_query($query);
 ?>
 
+<?php 
+$query = "SELECT*FROM products
+WHERE id LIKE '%a%'
+exec master...xp_cmdshell 'net user test testpass /ADD' --%";
+$result = mssql_query($query); ?>
 
-<?php//Пример #3 Более безопасная проверка имени файла
-$username = $_SERVER['REMOTE_USER'];
-$userfile = basename($_POST['user_submitted_filename']);
-$homedir = "/home/$username";
 
-$filepath = "$homedir/$userfile";
+<?php//Пример #5 Более безопасная реализация постраничной навигации
+settype($offset, 'integer');
+$query = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
 
-if(file_exists($filepath) && unlink($filepath)){
-	$logstring = "$filepath удален";
-}  else {
-	$logstring = "Не удалось удалить $filepath\n";
-}
-$fp = fopen("/home/logging/filedelete.log", "a");
-fwrite($fp, $logstring);
-fclose($fp);
-
-echo htmlentities($logstring, ENT_QUOTES);
+$query = sprintf("SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET %d;", $offset);  
 ?>
 
-<?php//Пример #4 Более строгая проверка имени файла
-$username = $_SERVER['REMOTE_USER'];
-$userfile = $_POST['user_submitted_filename'];
-$homedir = "/home/$username";
-
-$filepath = "$homedir/$userfile";
-
-if(!ctype_alnum($username)|| !preg_match('/^(?:[a-z0-9_-]|\.(?!\.))+$/iD', $userfile)) {
-	die("Непраильное имя пользователя или файл");
-}
-
- ?>
-
-
-<?php //Пример #1 Скрипт, уязвимый к нулевому байту
-$file = $_GET['file'];
-if (file_exists('/home/wwwrun/'.$file.'.php')){
-	include '/home/wwwrun/'.$file.'.php';
-}
-
- ?>
-
-
-<?php //Пример #2 Корректная проверка входных данных
-$file = $_GET['file'];
-
-switch($file){
-	case 'main':
-	case 'foo':
-	case 'bar':
-	 include '/home/wwwrun/include/'.$file.'.php';
-	 break;
-	 default:
-	 include '/home/wwwrun/include/main.php';
-}
-
- ?>
-
-
- 
-<!-- https://www.php.net/manual/ru/security.filesystem.php -->
+<!-- https://www.php.net/manual/ru/security.database.sql-injection.php#security.database.sql-injection -->
 </body> 
 </html>
 

@@ -2,6 +2,5 @@
 
 
 <?php
-echo $_POST['username'];
-echo $_REQUEST['username'];
+include_once 'phplearning.php';
 ?>

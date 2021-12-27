@@ -3,132 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерфейс внешней функции (Foreign Function Interface)</title>    
+    <title>Управление буфером вывода</title>    
 </head>
 <body>
 
-<?php //Пример #1 Вызов функции из общей библиотеки
-$ffi = FFI::cdef(
-"int printf(const char *format, ...",
-"libc.so.6");
+<?php //Пример #1 Пример контроля вывода
+ob_start();
+echo "привет";
 
-$ffi->printf("привет, %s!", "мир");
+setcookie("cookiename", "cookiedata");
+
+ob_end_flush(); ?>
+
+
+<?php //Пример #1 Пример перезаписи вывода
+
+$_SERVER['HTTP_HOST'] = 'php.net';
+
+ini_set('url_rewriter.tags', 'a=href, from =');
+var_dump(ini_get('url_rewriter.tags'));
+
+output_add_rewrite_var('test', 'value');
+
+output_add_rewrite_var('test', 'value');
+ ?>
+
+ <a href="//php.net/index.php?bug=1234">bug1234</a>
+<form action="https://php.net/?bug=1234&edit=1" action="post">
+ <input type="text" name="title" />
+</form>
+
+
+   <!--  flush — Сброс системного буфера вывода
+    ob_clean — Очистить (стереть) буфер вывода
+    ob_end_clean — Очистить (стереть) буфер вывода и отключить буферизацию вывода
+    ob_end_flush — Сбросить (отправить) буфер вывод и отключить буферизацию вывода
+    ob_flush — Сбросить (отправить) буфер вывода
+    ob_get_clean — Получить содержимое текущего буфера и удалить его
+    ob_get_contents — Возвращает содержимое буфера вывода
+    ob_get_flush — Сбросить буфер вывода, вернуть его в виде строки и отключить буферизацию вывода
+    ob_get_length — Возвращает размер буфера вывода
+    ob_get_level — Возвращает уровень вложенности механизма буферизации вывода
+    ob_get_status — Получить статус буфера вывода
+    ob_gzhandler — callback-функция, используемая для gzip-сжатия буфера вывода при вызове ob_start
+    ob_implicit_flush — Включение/выключение неявного сброса
+    ob_list_handlers — Список всех используемых обработчиков вывода
+    ob_start — Включение буферизации вывода
+    output_add_rewrite_var — Добавить значения в обработчик URL
+    output_reset_rewrite_vars — Сбросить значения обработчика URL
+ -->
+
+<?php //Пример #1 Пример использования функции ob_end_clean()
+ob_start();
+echo 'текст, который не отобразится';
+ob_end_clean();
  ?>
 
 
-<?php //Пример #2 Вызов функции и возврат структуры через аргумент
-$ffi = FFI::cdef("
-    typedef unsigned int time_t;
-    typedef unsigned int suseconds_t;
+<?php //Пример #1 Простой пример использования функции ob_get_clean()
+ob_start();
 
-    struct timeval {
-        time_t   tv_sec;
-        suseconds_t tv_usec;
-    };
+echo "привет мир";
 
-    int gettimeofday(struct timeval  *tv, struct timezone  *tz);", "libc.so.6");
+$out = ob_get_claen();
+$out = strtolower($out);
 
-    $tv = $ffi->new("struct timeval");
-    $tz = $ffi->new("struct timezone");
-
-    var_dump($ffi->gettimeofday(FFI::addr($tv), FFI::addr($tz)));
-
-    var_dump($tv->tv_sec);
-
-    var_dump($tz);
+var_dump($out);
  ?>
 
 
-<?php //Пример #3 Доступ к существующим переменным C
-$x = FFI::new("int");
-var_dump($x->cdata);
+ <?php //Пример #1 Простой пример использования функции ob_get_contents()
 
-$x->cdata = 5;
-var_dump($x->cdata);
+ ob_start();
+ echo "привет";
 
-$x->cdata +=2;
-var_dump($x->cdata);
+ $out1 = ob_get_contents();
+
+ echo "мир";
+
+ $out2 = ob_get_contents();
+
+ ob_end_clean();
+
+ var_dump($out1, $out2); ?>
+
+
+ <?php //Пример #1 Пример использования функции ob_get_flush()
+print_r(ob_list_handlers());
+
+$buffer = ob_get_flush();
+file_put_contents('buffer.txt', $buffer);
+
+print_r(ob_list_handlers());
+  ?>
+
+
+<?php //Пример #1 Простой пример использования функции ob_get_length()
+ob_start();
+
+echo "привет";
+
+$len1 = ob_get_lenth();
+
+echo "мир";
+
+$len2 = ob_get_lenth();
+
+ob_end_clean();
+
+echo $len1 . ", ".$len2;
  ?>
 
-<?php //Пример #5 Работа с массивами C
-$a = FFI::new("long[1024]");
+<?php //Пример #1 Пример использования функции ob_gzhandler()
+ob_start("ob_gzhandler");
+ ?>
 
-for ($i = 0; $i<count($a); $i++){
-    $a[$i]=$i;
+ <html>
+<body>
+<p>Это должно быть сжатой страницей.</p>
+</body>
+</html>
+
+
+<?php //Пример #1 Пример использования функции ob_list_handlers()
+print_r(ob_list_handlers());
+ob_end_flush();
+
+ob_start("ob_handler");
+print_r(ob_list_handlers());
+ob_end_flush();
+
+ob_start(function($string){
+    return $string;
+});
+print_r(ob_list_handlers());
+ob_end_flush();
+ ?>
+
+
+<?php //Пример #1 Пример callback-функции, определённой пользователем
+function callback($buffer){
+    return(str_replace("яблоки", "апельсин", "$buffer"));
 }
-var_dump($a[25]);
-$sum = 0;
-foreach ($a as $n){
-    $sum +=$n;
-}
-var_dump($sum);
-var_dump(count($a));
-var_dump(FFI::sizeof($a));
+
+ob_start("callback"); ?>
+
+<html>
+<body>
+<p>Это всё равно что сравнить яблоки и апельсины.</p>
+</body>
+</html>
+
+<?php 
+ob_end_flush(); ?>
+
+
+<?php //Пример #2 Создание нестираемого буфера вывода
+
+ob_start(null, 0, PHP_OUTPUT_HANDLER_STDFLAGS ^ PHP_OUTPUT_HANDLER_REMOVABLE); ?>
+
+
+<?php //Пример #1 Пример использования функции output_add_rewrite_var()
+output_add_rewrite_avr('var', 'value');
+
+echo '<a href="file.php">ссылка</a>
+<a href="http://example.com">ссылка2</a>';
+
+echo '<form action="script.php" method="post">
+<input type="text" name="var2" />
+</form>';
+
+print_r(ob_list_handlers());
  ?>
 
+<?php //Пример #1 Пример использования функции output_reset_rewrite_vars()
 
-<?php //Пример #6 Работа с перечислениями C
-$a = FFI::cdef('typedef enum _zend_ffi_symbol_kind{
-    ZEND_FFI_SYM_TYPE,
-    ZEND_FFI_SYM_CONST = 2,
-    ZEND_FFI_SYM_VAR,
-    ZEND_FFI_SYM_FUNC
-} zend_ffi_symbol_kind;');
- 
- var_dump($a->ZEND_FFI_SYM_TYPE);
- var_dump($a->ZEND_FFI_SYM_CONST);
- var_dump($a->ZEND_FFI_SYM_VAR);
- ?>
+session_start();
+output_add_rewrite_var('var', 'value');
 
+echo '<a href="file.php">ссылка</a>';
+ob_flush();
 
-<?php //Callback-функции PHP ¶
-$zend = FFI::cdef("
-typedef int (*zend_write_func_t)(const chsr *str, size_t_str str_lenght);
-extern zend_write_func_t zend_write;");
+output_reset_rewrite_vars();
+echo '<a href="file.php">ссылка</a>'; ?>
 
-echo "привет, мир ";
-
-$orig_zend_write = clone $zend->zend_write;
-$zend->zend_write = function($str, $len){
-    global $orig_zend_write;
-    $orig_zend_write("{\t", 3);
-        $ret = $orig_zend_write($str, $len);
-        $orig_zend_write(
-        "}", 2);
-    return $ret;
-};
-echo "Привет мир";
-$zend->zend_write = $orig_zend_write;
-echo "привет, мир";
- ?>
-
-
-<!-- FFI — Основной интерфейс к коду и данным C
-    FFI::addr — Создаёт неуправляемый указатель на данные C
-    FFI::alignof — Возвращает величину выравнивания
-    FFI::arrayType — Динамически конструирует новый тип С массива
-    FFI::cast — Производит преобразование типа C
-    FFI::cdef — Создаёт новый объект FFI
-    FFI::free — Высвобождает неуправляемую структуру данных
-    FFI::isNull — Проверяет, является ли FFI\CData нулевым указателем
-    FFI::load — Загрузить декларации C из заголовочного файла
-    FFI::memcmp — Сравнивает две области памяти
-    FFI::memcpy — Копирует содержимое одной области памяти в другую
-    FFI::memset — Заполнить область памяти
-    FFI::new — Создаёт структуру данных C
-    FFI::scope — Инстанциирует объект FFI в соответствии с декларацией С, разобранной на этапе предзагрузки
-    FFI::sizeof — Возвращает размер данных или типа C
-    FFI::string — Создаёт строку PHP из области памяти
-    FFI::type — Создаёт объект FFI\CType из декларации С
-    FFI::typeof — Получает FFI\CType для FFI\CData
-FFI\CData — Доступ к данным C
-FFI\CType — Доступ к типам C
-FFI\Exception — Исключения FFI
-FFI\ParserException — Исключения парсера FFI -->
-
-
-
-<!-- https://www.php.net/manual/ru/book.ffi.php -->
+<!-- https://www.php.net/manual/ru/book.outcontrol.php -->
 </body> 
 </html>
 

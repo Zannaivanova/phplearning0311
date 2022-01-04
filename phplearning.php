@@ -3,55 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Readline</title>    
+    <title>Phar</title>    
 </head>
 <body>
-<?php//Пример #1 Пример использования callback-интерфейса readline
-function rl_callback($ret){
+<?php //Использование класса Phar 
+try {
+    $p = new Phar('coollibrary.phar', 0);
 
-  global $c, $prompting;
-
-  echo "Вы ввели: $ret ";
-  $c++;
-  if ($c>10){
-    $prompting = false;
-    readline_callback_handler_remove();
-  } else {
-    readline_callback_handler_install("[$c]Поговори со мной: ", 'rl_callback');
-  }
-}
-$c = 1;
-$prompting = true;
-readline_callback_handler_install("[$c] Введите что-нибудь", 'rl_callback');
-
-while($prompting){
-    $w = NULL;
-    $e = NULL;
-    $n - stream_select($r = array(STDIN), $w, $e, null);
-    if ($n && in_array(STDIN, $r)){
-        readline_callback_read_char();
+    foreach(new RecursiveIteratorIterator($p) as $file){
+        echo $file->getFileName().;
+        echo file_get_contents($file->getPathName()).
     }
+    if (isset($p['internal/file.php'])){
+        var_dump($p['internal/file.php']->getMetadata());
+    }
+
+    if (Phar::canWrite()){
+        $p = new Phar('newphar.tar.phar', 0, 'newphar.tar.phar');
+
+        $p=$p->convertToExecutable(Phar::TAR, Phar::GZ);
+(new RecursiveIteratorIterator(new RecursiveDirectoryIterator('/путь/к/проекту/project')), '/путь/к/проекту/');
+
+$p['file1.txt']='Информация';
+$fp = fopen('hugefile.dat', 'rb');
+
+$p['data/hugefile.dat']=$fp;
+
+if(Phar::canCompress(Phar::GZ)){
+
+ $p['data/hugefile.dat']->compress(Phar::GZ);
 }
-echo "Ввод отключеню Спасибо за внимание";
+$p['images/wow.jpg']=file_get_contents('images/wow.jpg');
+$p['images/wow.jpg']->setMetadata(array('mime-type'=>'image/jpeg'));
+$p['index.php']=file_get_contents('index.php');
+$p->setMetadata(array('bootstart'=>'index.php'));
+
+$p->stopBuffering();
+}} catch (Exeption $e){
+    echo 'Невозможно открыть Phar: ', $e;
+}
 ?>
 
-<?php //Пример #1 Пример использования readline()
-//получим 3 команды от пользователя
-for ($i=0; $i < 3; $i++) {
-        $line = readline("Command: ");
-        readline_add_history($line);
-}
 
-//распечатаем историю ввода
-print_r(readline_list_history());
+<?php //Использование Phar-архивов: обёртка потока phar 
+$context = stream_context_create(array('phar'=> array('compresss'=> Phar::GZ)),
+array('metadata'=> array('user'=>'cellog')));
+file_put_contents('phar://my.phar/somefile.php', 0, $context);
 
-//распечатаем переменные
-print_r(readline_info());
-?>
+ ?>
 
-
-
-<!-- https://www.php.net/manual/ru/radius.constants.attributes.php -->
+<!-- https://www.php.net/manual/ru/phar.using.intro.php -->
 </body> 
 </html>
 

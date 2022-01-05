@@ -3,113 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rar</title>    
+    <title>Hash</title>    
 </head>
 <body>
-<?php //Пример #1 Декомпрессия на лету
-if (!array_key_exists("i", $_GET)||!is_numeric($_GET["i"]))
-    die("Индекс не указан или не числовой");
-$index = (int)$_GET["i"];
+<?php //Пример #1 Пример использования hash_copy()
+$context = hash_init("md5");
+hash_update($context, "data");
 
-$arch = RarArchive::open("example.rar");
-if($arch === FALSE)
-    die ("невозможно открыть example.rar");
+$copy_context = hash_copy($context);
 
-$entries = $arch->getEntries();
-if($entries === FALSE)
-die("невозможно получить записи");
+echo hash_final($context), "\n";
 
-if(!array_key_exists($index, $entries))
-die("нет такого индекса: $index");
+hash_update($copy_context, "data");
+echo hash_final($copy_context),"\n";
+ ?>
 
-$orfilename = $entries[$index]->getName();
 
-$filesize = $entries[$index]->getUnpackedSize();
+<?php //Пример #1 Пример использования hash_equals()
+$expected = crypt('12345', '$2a$07$usesomesillystringforsalt$');
+$correct = crypt('12345', '$2a$07$usesomesillystringforsalt$');
+$incorrect = crypt('apple', '$2a$07$usesomesillystringforsalt$');
 
-$fp = $entries[$index]->getStream();
-if ($fp === FALSE)
-    die("невозсожно открыть файл с индексом $index внутри архива");
+var_dump(hash_equals($expected, $correct));
+var_dump(hash_equals($expected, $incorrect));
+ ?>
 
-$arch->close();
+<?php //Пример #1 Использование hash_file()
+file_put_contents('example.txt', 'наглый коричневы лисенок прыгвет вокрун ленивой собаки');
 
-function detectUserAgent(){
-    if(!array_key_exists('HTTP_USER_AGENT', $_server))
-        return "Other";
+echo hash_file('md5', 'example.txt');
+ ?>
 
-    $uas = $_SEREVER['HTTP_USER_AGENT'];
-    if (preg_match("@Opera/@", $uas))
-        return "Opera";
-    if (preg_match("@Firefox/@", $uas))
-        return "Firefox";
-    if (preg_match("@Chrome/@", $uas))
-        return "Chrome";
-    if (preg_match("@MSIE([0-9.]+);@", $uas, $matches)){
-        if(((float)$matches[1])>=7.0)
-            return"IE";
-    }
-    return"Other";
-        } 
 
-$formatRFC2231 = 'Content-Desposition: attachment; filename*=UTF-8\'\'%s';
-$formatDef = 'Content-Disposition: attachment; filename = "%s"';
+<?php //Пример #1 Пример использования hash_final()
+$ctx = hash_init('sha1');
+hash_update($ctx, 'наглый коричневы лисенок прыгвет вокрун ленивой собаки');
+echo hash_final($ctx);
+ ?>
 
-switch(detectUserAgent()){
-    case"Opera":
-    case "Ferefox":
-    $orfilename = rawurlencode($orfilename);
-    $format = $formatRFC2231;
-    break;
 
-    case"IE":
-    case"Chrome":
-      $orfilename = rawurlencode($orfilename);
-      $format = $formatDef;
-      break;
-    default:
-      if (function_exists("iconv"))
-$orfilename = 
-@iconv("UTF-8", "ISO-8859-1//TRANSLIT", $orfilename);
-$format = $formatDef;
-}
-header(sprintf($format, $orfilename));
+<?php //Пример #1 Пример использования hash_hkdf()
+$inputKey = random_bytes(32);
+$salt = random_bytes(16);
 
-$contentType="application/octet-stream";
-header("Content-Type:$contentType");
+$encryptionKey = hash_hkdf('sha256', $inputKey, 32, 'aes-256-encryption', $salt);
+$authenticationKey = hash_hkdf('sha256', $inputKey, 32, 'sha-256-athentication', $salt);
 
-header("Content-Transfer-Encoding:binary");
+var_dump($encrypionKey !==$authenticationKey);
+ ?>
 
-header("Content-Length:$filesize");
+<?php //Пример #1 Пример использования hash_hmac_file()
+file_put_contents('example.txt', 'Наглый коричневый лисёнок прыгает вокруг ленивой собаки.');
 
-if($_SERVER['REQUEST_METHOD']=="HEAD")
-    die();
+echo hash_hmac_file('md5', 'example.txt', 'secret');
+ ?>
 
-while(!feof($fp)){
-    $s = @fread(Fp, 8192);
-    if ($s === false)
-        break;
+<?php //Пример #1 Пример инкрементального хеширования
+$ctx = hash_init('md5');
+hash_update($ctx, 'Наглый коричневый лисёнок ');
+hash_update($ctx, 'прыгает вокруг ленивой собаки.');
+echo hash_final($ctx);
+ ?>
 
-    echo $s;
-}
-        ?>
-        
-      
 
-<?php //Пример #2 Пример извлечения перечня файлов и директорий из RAR-архива
-$rar_file = rar_open('example.rar') or die ("невозможно открыть Rar архив");
+<?php //Пример #1 Пример простого использования hash_pbkdf2()
+$password = 'password';
+$iterations = 1000;
 
-$entries = rar_list($rar_file);
+$salt = openssl_random_pseudo_bytes(16);
+$hash = hash_pdkdf2("sha256", 4password, $salt, $iteration s, 20);
+var_dump($hash);
 
-foreach($entries as $entry){
-echo ''.$entry->getName().;
-echo ''.$entry->getPackedSize().;
-echo ''.$entry->getUnpackedSize().;
+$hash = hash_pdkdf2("sha256", $password, $salt, $iterations, 10,true);
+var_dump(bin2hex($hash));
+ ?>
 
-$entry->extract('/dir/extract/to/');
-}
-rar_close($rar_file);
- ?>  
-        <!-- https://www.php.net/manual/ru/rar.examples.php -->
-        </body> 
+<?php //Пример #1 Пример использования hash_update_stream()
+$fp=tmpfile();
+fwrite($fp, 'Наглый коричневый лисёнок прыгает вокруг ленивой собаки.');
+rewind($fp);
+
+$ctx = hash_init('md5');
+hash_update_stream($ctx, $fp);
+echo hash_final($ctx);
+ ?>
+
+<!-- https://www.php.net/manual/ru/function.hash-copy.php -->
+       </body> 
         </html>
         
         
@@ -120,6 +100,7 @@ rar_close($rar_file);
         
         
         
+       
         
         
         
@@ -137,7 +118,3 @@ rar_close($rar_file);
         
         
         
-        
-        
-        "}
-}

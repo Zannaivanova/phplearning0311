@@ -3,83 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phar</title>    
+    <title>Rar</title>    
 </head>
 <body>
-<?php //Использование класса Phar 
-try {
-    $p = new Phar('coollibrary.phar', 0);
+<?php //Пример #1 Декомпрессия на лету
+if (!array_key_exists("i", $_GET)||!is_numeric($_GET["i"]))
+    die("Индекс не указан или не числовой");
+$index = (int)$_GET["i"];
 
-    foreach(new RecursiveIteratorIterator($p) as $file){
-        echo $file->getFileName().;
-        echo file_get_contents($file->getPathName()).
+$arch = RarArchive::open("example.rar");
+if($arch === FALSE)
+    die ("невозможно открыть example.rar");
+
+$entries = $arch->getEntries();
+if($entries === FALSE)
+die("невозможно получить записи");
+
+if(!array_key_exists($index, $entries))
+die("нет такого индекса: $index");
+
+$orfilename = $entries[$index]->getName();
+
+$filesize = $entries[$index]->getUnpackedSize();
+
+$fp = $entries[$index]->getStream();
+if ($fp === FALSE)
+    die("невозсожно открыть файл с индексом $index внутри архива");
+
+$arch->close();
+
+function detectUserAgent(){
+    if(!array_key_exists('HTTP_USER_AGENT', $_server))
+        return "Other";
+
+    $uas = $_SEREVER['HTTP_USER_AGENT'];
+    if (preg_match("@Opera/@", $uas))
+        return "Opera";
+    if (preg_match("@Firefox/@", $uas))
+        return "Firefox";
+    if (preg_match("@Chrome/@", $uas))
+        return "Chrome";
+    if (preg_match("@MSIE([0-9.]+);@", $uas, $matches)){
+        if(((float)$matches[1])>=7.0)
+            return"IE";
     }
-    if (isset($p['internal/file.php'])){
-        var_dump($p['internal/file.php']->getMetadata());
-    }
+    return"Other";
+        } 
 
-    if (Phar::canWrite()){
-        $p = new Phar('newphar.tar.phar', 0, 'newphar.tar.phar');
+$formatRFC2231 = 'Content-Desposition: attachment; filename*=UTF-8\'\'%s';
+$formatDef = 'Content-Disposition: attachment; filename = "%s"';
 
-        $p=$p->convertToExecutable(Phar::TAR, Phar::GZ);
-(new RecursiveIteratorIterator(new RecursiveDirectoryIterator('/путь/к/проекту/project')), '/путь/к/проекту/');
+switch(detectUserAgent()){
+    case"Opera":
+    case "Ferefox":
+    $orfilename = rawurlencode($orfilename);
+    $format = $formatRFC2231;
+    break;
 
-$p['file1.txt']='Информация';
-$fp = fopen('hugefile.dat', 'rb');
-
-$p['data/hugefile.dat']=$fp;
-
-if(Phar::canCompress(Phar::GZ)){
-
- $p['data/hugefile.dat']->compress(Phar::GZ);
+    case"IE":
+    case"Chrome":
+      $orfilename = rawurlencode($orfilename);
+      $format = $formatDef;
+      break;
+    default:
+      if (function_exists("iconv"))
+$orfilename = 
+@iconv("UTF-8", "ISO-8859-1//TRANSLIT", $orfilename);
+$format = $formatDef;
 }
-$p['images/wow.jpg']=file_get_contents('images/wow.jpg');
-$p['images/wow.jpg']->setMetadata(array('mime-type'=>'image/jpeg'));
-$p['index.php']=file_get_contents('index.php');
-$p->setMetadata(array('bootstart'=>'index.php'));
+header(sprintf($format, $orfilename));
 
-$p->stopBuffering();
-}} catch (Exeption $e){
-    echo 'Невозможно открыть Phar: ', $e;
+$contentType="application/octet-stream";
+header("Content-Type:$contentType");
+
+header("Content-Transfer-Encoding:binary");
+
+header("Content-Length:$filesize");
+
+if($_SERVER['REQUEST_METHOD']=="HEAD")
+    die();
+
+while(!feof($fp)){
+    $s = @fread(Fp, 8192);
+    if ($s === false)
+        break;
+
+    echo $s;
 }
-?>
+        ?>
+        
+      
 
+<?php //Пример #2 Пример извлечения перечня файлов и директорий из RAR-архива
+$rar_file = rar_open('example.rar') or die ("невозможно открыть Rar архив");
 
-<?php //Использование Phar-архивов: обёртка потока phar 
-$context = stream_context_create(array('phar'=> array('compresss'=> Phar::GZ)),
-array('metadata'=> array('user'=>'cellog')));
-file_put_contents('phar://my.phar/somefile.php', 0, $context);
+$entries = rar_list($rar_file);
 
- ?>
+foreach($entries as $entry){
+echo ''.$entry->getName().;
+echo ''.$entry->getPackedSize().;
+echo ''.$entry->getUnpackedSize().;
 
-<!-- https://www.php.net/manual/ru/phar.using.intro.php -->
-</body> 
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+$entry->extract('/dir/extract/to/');
+}
+rar_close($rar_file);
+ ?>  
+        <!-- https://www.php.net/manual/ru/rar.examples.php -->
+        </body> 
+        </html>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        "}
+}

@@ -3,181 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sodium</title>    
+    <title>Модули для работы с базами данных</title>    
 </head>
 <body>
-<?php //Пример #1 Пример использования sodium_crypto_box_seal_open()
-$sealed_b64 = "oRBXXAV4iQBrxlV4A21Bord8Yo/D8ZlrIIGNyaRCcGBfpz0map52I3xq6l+CST+1NSgQkbV+HiYyFjXWiWiaCGupGf+zl4bgWj/A9Adtem7Jt3h3emrMsLw=";
-$seled = base64_decode(sealed_b64);
 
-$keypair_b64="KZkF8wnB7bnC2aXB3lFOqCTc0Z6MllvaQb9ASVG8o2/MsewkuE4u1uaEgTzSakeiYyIW8DGj+02/L3cWIbs9bQ==";
-$keypair = sodium_base64bin($keypair_b64, SODIUM_BASE64_VARIANT_ORIGINAL);
 
-$opened = sodium_crypto_box_seal_open($sealed, $keypair);
-var_dump($opened);
- ?>
+    <!-- 
+    Уровни абстракции
+        DBA — Database (dbm-style) Abstraction Layer
+        ODBC — ODBC (Unified)
+        PDO — Объекты данных PHP
+    Модули для работы с базами данных отдельных производителей
+        CUBRID
+        dBase
+        Firebird/InterBase
+        IBM DB2 — IBM DB2, Cloudscape и Apache Derby
+        MongoDB — Драйвер MongoDB
+        MySQL — MySQL драйверы и плагины
+        OCI8 — Oracle OCI8
+        PostgreSQL
+        SQLite3
+        SQLSRV — Драйвер СУБД Microsoft SQL Server для PHP
+ -->
 
-<?php //Пример #1 Пример использования sodium_crypto_box_seal()
-$keypair = sodium_crypto_box_keypair();
-$public_key = sodium_crypto_box_publickey($keypair);
+<?php //Пример #1 DBA пример
+$id = dba_open("/tmp/test.db", "n", "db2");
 
-$plaintext_b64="V3JpdGluZyBzb2Z0d2FyZSBpbiBQSFAgY2FuIGJlIGEgZGVsaWdodCE=";
-$decoded_plaintext = sodium_base64bin($plaintext_b64, SODIUM_BASE64_VARGRANT_ORIGINAL);
-
-$sealed = sodium_crypto_box_seal($decoded_plaintext, $public_key);
-var_dump(base64_encode($sealed));
-
-$opened = sodium_crypto_box_seal_open($sealed, $keypair);
-var_dump($opened);
- ?>
-
-<?php //Пример #1 Пример использования sodium_crypto_generichash_final()
-$message = [random_bytes(32), random_bytes(32), random_bytes(16)];
-$sate = sodium_crypto_generichash_init('', 32);
-foreach ($messages as $message) {
-sodium_crypto_generichash_update($state, $message);
+if(!$id){
+    echo "dba_open failed";
+    exit;
 }
-$final = sodium_crypto_generichash_final($state, 32);
-var_dupm(sodium_bin2hex($final));
 
-$allAtOnce = sodium_crypto_generichash(implode('',$messages));
-var_dump(sodium_bin2hex($allAtOnce));
- ?>
+dba_repalce("key", "this is an example", $id);
 
-<?php //Пример #1 Пример использования sodium_crypto_generichash_init()
-$messages = [random_bytes(32), random_bytes(32), random_bytes(16)];
-$state = sodium_crypto_generichash_init('',32);
-foreach ($messages as $mesage){
-    sodium_crypto_generichash_update($state, $message);
+if (dba_exists("key", $id)){
+    echo dba_fetch("key", $id);
+    dba_delete("key", $id);
 }
-$final = sodium_crupto_generichash_final($state, 32);
-var_damp(sodium_bin2hex($final));
-$allAtOnce = sodium_crypto_generichash(implode('', $messages));
-var_dump(sodium_bin2hex($allAtOnce));
+
+dba_close($id);
  ?>
 
- <?php //Пример #1 Пример использования sodium_crypto_generichash_update()
-$messages = [random_bytes(32), random_bytes(32), random_bytes(16)];
-$state = sodium_crypto_generichash_init();
-foreach ($messages as $message){
-    sodium_crypto_generichash_update($state, $message);
+
+<?php //Пример #2 Обход базы данных
+$key = dba_firstkey($id);
+
+while($key !==false){
+    if (true){
+        $handle_later[]=$key;
+    }
+    $key = dba_nextkey($id);
 }
-$final = sodium_crypto_generichash_final($state);
-var_dump(sodium_bin2hex($final));
 
-$allAtOnce = sodium_crypto_generichash(implode('', $messages));
-var_dump(sodium_bin2hex($allAtOnce));
-  ?>
-
-<?php //Пример #1 Пример использования sodium_crypto_kx_keypair()
-$keypair = sodium_crypto_kx_keypair();
-$secret = sodium_crypto_kx_publickey($keypiar);
-printf("секретный ключ: %s\nоткрытый ключ: %s", bin2hex($secret), bin2hex($public));
- ?>
-
- <?php //Пример #1 Пример использования sodium_crypto_pwhash_str()
-$password = 'password';
-echo sodium_crypto_pwhash_str($password,
-SODIUM_CRYPTO_PWHASH_OPSIMIT_INTERACTIVE, SODIUM_CTRYPTO_PWHASH_MEMLIMIT_INTERACTIVE);
-  ?>
-
-  <?php //Пример #1 Пример использования password_hash()
-$salt = random_bytes(SODIUM_CRYPTO_PWHASH_SALTBYTES);
-
-echo bin2hex(
-sodium_crypto_pwhash(
-16,
-'password',
-$salt,
-SODIUM_CRYPTO_PWHASH_OPSLIMIT_INYERACTIVE,
-SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE,
-SODIUM_CRYPTO_PWHASH_ALG_ARGON2ID13));
-   ?>
-
-<?php //Пример #1 Пример использования sodium_crypto_secretbox_keygen()
-$key = sodium_crypto_secretbox_keygen();
-var_dump(sodium_bin2hex($key));
- ?>
-
-<?php //Пример #1 Пример использования sodium_crypto_secretbox_open()
-$key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
-$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-$ciphertext = sodium_crypto_secretbox('message to be encrypted', $nonce, $key);
-
-$plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
-if ($plaintext !==false){
-    echo $plaintext . PHP_EOL;
+forech($handle_later as $val){
+    dba_deleted($val, $id);
 }
+ ?>
+
+<?php //Пример #1 Пример использования dba_handlers()
+echo" Доступные обработчики DBA";
+foreach (dba_handlers(true) as $handler_name =>$handler_version){
+    $handler_version = str_replace('$', '', $handler_version);
+    echo "-$handler_name: $handler_version";
+} ?>
+
+<?php //Пример #1 Перечисление привилегий для столбца
+$conn = odbc_connect($dsn, $user, $pass);
+$privileges = odbc_columnprivileges($conn, 'TutorialDB', 'dbo', 'test', 'id');
+while(($row = odbc_fetch_array($privileges))){
+    print_r($row);
+    break;
+} ?>
+
+<?php //Пример #1 Перечисление столбцов таблицы
+$conn = odbc_connect($dsn, $user, $pass);
+$columns = odbc_columns($conn, 'TutorialDB', 'dbo', 'test', '%');
+while(($row = odbc_fetch_array($columns)){
+    print_r($row);
+    break;
+})
+ ?>
+
+<?php //Пример #1 Соединения без DSN
+$connection = odbc_connect("Driver ={SQL SERVER Native Client 10.0};Server = $server; Database = $database;", $user, $password);
+
+$connection = odbc_connect("Driver={Microsoft Access Driver (*.mdb)};Dbq=$mdbFilename", $user, $password);
+
+$exelFile = realpath('C:/ExelData.xls');
+$exelDir = dirname($exelFile);
+$connection = odbc_connect("Driver={Microsoft Excel Driver (*.xls)};DriverId=790;Dbq=$excelFile;DefaultDir=$excelDir" , '', '');
+ ?>
+
+<?php //Пример #1 Перечисление доступных DSN
+$conn = odbc_connect('dsn', 'user', 'pass');
+$dsn_info = odbc_data_source($conn, SQL_FETCH_FIRST);
+while($dsn_info){
+    print_r($dsn_info);
+    $dsn_info = odbc_data_source($conn, SQL_FETCH_NEXT);
+} ?>
+
+
+<?php //Пример #1 Пример использования odbc_execute() и odbc_prepare()
+$a = 1;
+$b = 2;
+$c = 3;
+$stmt = odbc_prepare($conn, 'CALL myproc
+    (?,?,?)');
+$success = odbc_execute($stmt, array ($a, $b, $c));
+ ?>
+
+
+<?php //Пример #1 Примеры использования odbc_fetch_into()
+$rc = odbc_fetch_into($res_id, $my_array);
+ ?>
+
+
+<?php//Пример #1 Пример использования odbc_next_result()
+$r_Connection = odbc_connect($dsn, $username, $password);
+
+$s_SQL = <<<END_SQL
+SELECT 'A'
+SELECT 'B'
+SELECT 'C'
+END_SQL;
+
+$r_Results = odbc_exec($r_Connection, $s_SQL);
+
+$a_Row1 = odbc_fetch_array($r_Results);
+$a_Row2 = odbc_fetch_array($r_Results);
+echo "Вывод первого результирующего набора ";
+var_dump($a_Row1, $a_Row2);
+
+echo "Получение второго результирующего набора ";
+var_dump(odbc_next_result($r_Results));
+
+$a_Row1 = odbc_fetch_array($r_Results);
+$a_Row2 = odbc_fetch_array($r_Results);
+echo "Вывод второго результирующего набора ";
+var_dump($a_Row1, $a_Row2);
+
+echo "Получение третьего результирующего набора ";
+var_dump(odbc_next_result($r_Results));
+
+$a_Row1 = odbc_fetch_array($r_Results);
+$a_Row2 = odbc_fetch_array($r_Results);
+echo "Вывод третьего результирующего набора ";
+var_dump($a_Row1, $a_Row2);
+
+echo "Попытка получения четвёртого результирующего набора ";
+var_dump(odbc_next_result($r_Results));
 ?>
 
 
-<?php //Пример #1 Пример использования sodium_crypto_secretbox()
-$key = sodium_crypto_secretbox_keygen();
-$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-$plaintext = "message to be encrypted";
-$cipher = sodium_crypto_secretbox($plaintext, 4nonce, $key);
+<?php //Пример #1 Пример использования odbc_execute() и odbc_prepare()
+$a = 1;
+$b = 2;
+$c = 3;
+$stmt    = odbc_prepare($conn, 'CALL myproc(?,?,?)');
+$success = odbc_execute($stmt, array($a, $b, $c));
+?>
 
-var_dump(bin2hex($ciphertext));
-var_dupm(sodium_crypto_secretbox_open($ciphertext, $nonce, $key));
+
+<?php //Пример #1 Перечисление первичных ключей столбца
+$conn = odbc_connect($dsn, $user, $password);
+$primarykeys = odbc_primarykeys($conn, 'TutorialDB', 'dbo', 'TEST');
+while(($row = odbc_fetch_array($primarykeys))){
+    print_r($row);
+    break;
+} ?>
+
+<?php //Пример #1 Перечисление столбцов хранимой процедуры
+$conn = odbc_connect($dsn, $user, $pass);
+$columns = odbc_procedurecolumns($conn, 'TutorialDB', 'dbo', 'GetEmployeeSalesYTD;1', '%');
+while(($row = odbc_fetch_array($columns))){
+    print_r;
+    break;
+} ?>
+
+
+<?php //Пример #1 Примеры использования odbc_setoption()
+odbc_setoption($conn, 1, 102, 1);
+
+$resut = odbc_prepare($conn, $sql);
+odbc_setoption($result, 2,0, 30);
+odbc_execute($result);
+
  ?>
 
-<?php //Пример #1 Пример использования sodium_crypto_secretstream_xchacha20poly1305_init_pull()
-function decrypt_file(string $inputFilePath, string $outputFilePath, string $key): void{
-    $inputFile = fopen($inputFilePath, 'rb');
-    $outputFile = fopen($outputFilePath, 'wb');
-    $header = fread($inputFile, 24);
 
-    $state = sodium_crypto_stream_xchacha20poly1305_init_pull($header, $key);
-    $inputFileSize = fread($inputFile)['size'];
-
-    for($i = 24; $i<$inputFileSize; $i +=8192){
-        $ctxt_chunk = fread($inputFile, 8192);
-
-        [$ptxt_chun, $tag]=sodium_crypto_secretstream_xchacha20poly1305_pull($state, $ctxt_chank);
-fwrite($outputFile, $ptxt_chunk);
-    }
-sodium_memzero($state);
-fclose($inputFile);
-fclose($outputFile);
+ <?php //Пример #1 Вывод статистики о таблице
+$conn = odbc_connect($dsn, $user, $pass);
+$statistics = odbc_ststistics($conn, 'TutorialDB', 'dbo', 'TEST', SQL_INDEX_Unique, SQL_QUICK);
+while(($row = odbc_fetch_array($statistics))){
+    print_r($row);break;
 }
 
-$key=dodium_base64bin('MS0lzb7HC+thY6jY01pkTE/cwsQxnRq0/2L1eL4Hxn8=', SODIUM_BASE64_VARIANT_ORIGINAL);
+  ?>
 
-$example = sodium_hex2bin('971e33b255f0990ef3931caf761c59136efa77b434832f28ec719e3ff73f5aec38b3bba1574ab5b70a8844d8da36a668e802cfea2c');
-file_put_contents('hello.enc', $example);
-decrypt_file('hello.enc', 'hello.txt.decrypted', $key);
-var_dump(file_get_contents('hello.txt.decrypted'));
+<?php //Пример #1 Перечисление привилегий таблицы
+$conn = odbc_connect($dsn, $user, $pass);
+$privileges = odbc_tableprivileges($conn, 'SalesOrders', 'dbo', 'Orders');
+while(($row = odbc_fetch_array($privileges))){
+    print_r($row);
+    break;
+}
  ?>
 
-<?php //Пример #1 Пример использования sodium_crypto_secretstream_xchacha20poly1305_init_push()
-function encrypt_file(string $inputFilePath, string $outputFilePath, string $key): void{
-[$state, $header]= sodium_crypto_secretstream_xchacha20poly1305_init_push($key);
 
-$inputFile = fopen($inputFilePath, 'rb');
-$outputFile = fopen($outputFilePath, 'wb');
-
-fwrite($outputFile, $header);
-$inputFileSize -fstat($inputFile)[8175]{
-    $ptxt_chunk = fread($inputFile, 8175);
-    $ctxt_chunk = sodium_crypto_stream_xchacha20poly1305_init_push($state, $ptxt_chunk;
-        fwrite($outputFile, $ctxt_chunk);
-    }
-sodium_mumezero($state);
-fclose($inputFile);
-fclose($outputFile);
+<?php //Пример #1 Перечисление таблиц в каталоге
+$conn = odbc_connect($dsn, $user, $pass);
+$tables = odbc_tables($conn, 'SalesOrders', 'dbo', '%', 'TABLE');
+while(($row = odbc_fetch_array($tables))){
+    print_r($row);
+    break;
 }
 
-$key = sodium_base64bin('MS0lzb7HC+thY6jY01pkTE/cwsQxnRq0/2L1eL4Hxn8=',SODIUM_BASE64_VARIANT_ORIGINAL );
-
-file_put_contents('hello.txt', 'Hello world');
-encrypt_file('hello.txt', 'hello.txt.encrypted', $key);
-var_dump(sodium_bin2hex(file_get_contents('hello.txt.encrypted')));
-
-
  ?>
 
-
-<!-- https://www.php.net/manual/ru/function.sodium-crypto-box-seal-open.php -->
+<!-- https://www.php.net/manual/ru/refs.database.php -->
  </body> 
    </html>
         
